@@ -1,3 +1,5 @@
+import java.lang.Object;
+
 public class Board {
     private int totalPlayers, activePlayerIndex, currentDay, totalDays;
     private ArrayList<Player> players;

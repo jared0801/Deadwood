@@ -11,7 +11,7 @@ public class Room {
 
     public Room[] getNeighbors;
 
-    public Roles[] getOffCardRoles;
+    public Role[] getOffCardRoles;
 
     public int shootScene();
 }
