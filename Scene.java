@@ -4,6 +4,11 @@ public class Scene {
     private boolean isActive;
     private Role[] roles;
 
+    public Scene (String newName, int budg) {
+	name = newName;
+	budget = budg;
+    }
+    
     public int getBudget() {
 	return 0;
     }

@@ -1,5 +1,3 @@
-import java.lang.Object;
-
 public class Player {
     private String name;
     private int dollars, credits, rank;

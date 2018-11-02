@@ -3,6 +3,12 @@ public class Role {
     private int reqRank;
     private boolean isTaken;
 
+    public Role(String newName, int rank) {
+	name = newName;
+	reqRank = rank;
+	isTaken = false;
+    }
+    
     public int getRank() {
 	return 0;
     }
