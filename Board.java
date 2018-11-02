@@ -1,13 +1,13 @@
-import java.lang.Object;
+import java.util.*;
 
 public class Board {
     private int totalPlayers, activePlayerIndex, currentDay, totalDays;
-    private ArrayList<Player> players;
+    private List<Player> players;
     private Room[] rooms;
 
     public Board(int numPlayers) {
 	totalPlayers = numPlayers;
-	players = new List<Player>(numPlayers);
+	players = new ArrayList<Player>(numPlayers);
     }
 
     public void newDay() {
@@ -22,11 +22,11 @@ public class Board {
 	return;
     }
 
-    public ArrayList<Player> getPlayers() {
+    public List<Player> getPlayers() {
         return players;
     }
 
-    public ArrayList<Room> getRooms() {
+    public Room[] getRooms() {
         return rooms;
     }
 
