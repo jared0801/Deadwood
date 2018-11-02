@@ -3,9 +3,15 @@ public class Role {
     private int reqRank;
     private boolean isTaken;
 
-    public int getRank();
+    public int getRank() {
+	return 0;
+    }
 
-    public boolean checkTaken();
+    public boolean checkTaken() {
+	return true;
+    }
 
-    public void take();
+    public void take() {
+	return;
+    }
 }

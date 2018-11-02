@@ -2,31 +2,60 @@ import java.lang.Object;
 
 public class Player {
     private String name;
-    private int money, credits, rank;
+    private int dollars, credits, rank;
     private boolean hasRole;
     private Role currentRole;
 
-    private int rollDice(int numDice);
+    public Player (String newName) {
+	name = newName;
+	dollars = 0;
+	credits = 0;
+	rank = 1;
+	hasRole = false;
+	currentRole = null;
+    }
 
-    public void takeRole();
+    private int rollDice(int numDice) {
+	return 0;
+    }
+
+    public void takeRole() {
+	return;
+    }
 
     public boolean hasRole() {
         return hasRole;
     }
 
-    public void act();
+    public void act() {
+	return;
+    }
 
-    public void rehearse();
+    public void rehearse() {
+	return;
+    }
 
-    public void move();
+    public void move() {
+	return;
+    }
 
-    public void upgrade();
+    public void upgrade() {
+	return;
+    }
 
-    public void modifyDollars(int amount);
+    public void modifyDollars(int amount) {
+	return;
+    }
 
-    public void modifyCredits(int amount);
+    public void modifyCredits(int amount) {
+	return;
+    }
 
-    public int getDollars();
+    public int getDollars() {
+	return dollars;
+    }
 
-    public int getCredits();
+    public int getCredits() {
+	return credits;
+    }
 }

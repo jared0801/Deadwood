@@ -5,13 +5,23 @@ public class Room {
     private Room[] neighborRooms;
     private Role[] offCardRoles;
 
-    public void setScene(Scene newsScene);
+    public void setScene(Scene newsScene) {
+	return;
+    }
 
-    public Scene getScene();
+    public Scene getScene() {
+	return currentScene;
+    }
 
-    public Room[] getNeighbors;
+    public Room[] getNeighbors() {
+	return neighborRooms;
+    }
 
-    public Role[] getOffCardRoles;
+    public Role[] getOffCardRoles() {
+	return offCardRoles;
+    }
 
-    public int shootScene();
+    public int shootScene() {
+	return 0;
+    }
 }

@@ -5,11 +5,22 @@ public class Board {
     private ArrayList<Player> players;
     private Room[] rooms;
 
-    public void newDay();
+    public Board(int numPlayers) {
+	totalPlayers = numPlayers;
+	players = new List<Player>(numPlayers);
+    }
 
-    public void createGame();
+    public void newDay() {
+	return;
+    }
 
-    public void endGame();
+    public void createGame() {
+	return;
+    }
+
+    public void endGame() {
+	return;
+    }
 
     public ArrayList<Player> getPlayers() {
         return players;
@@ -23,7 +34,11 @@ public class Board {
         return players.get(activePlayerIndex);
     }
 
-    public void payoutMoney(int dollars, int credits, Player target);
+    public void payoutMoney(int dollars, int credits, Player target) {
+	return;
+    }
 
-    public void takeMoney(int dollars, int credits, Player target);
+    public void takeMoney(int dollars, int credits, Player target) {
+	return;
+    }
 }

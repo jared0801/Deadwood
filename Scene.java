@@ -4,11 +4,19 @@ public class Scene {
     private boolean isActive;
     private Role[] roles;
 
-    public int getBudget();
+    public int getBudget() {
+	return 0;
+    }
 
-    public Role[] getRoles();
+    public Role[] getRoles() {
+	return null;
+    }
 
-    public boolean getActive();
+    public boolean getActive() {
+	return true;
+    }
 
-    public void wrap();
+    public void wrap() {
+	return;
+    }
 }
