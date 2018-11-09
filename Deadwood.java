@@ -11,7 +11,8 @@ public class Deadwood {
       String sceneXml = args[0];
       String boardXml = args[1];
 
-      Scene[] sceneArr;
+      Scene[] sceneArr = null;
+      Room[] roomArr = null;
       Board board;
       Scanner in = new Scanner(System.in);
 
@@ -32,13 +33,11 @@ public class Deadwood {
       System.out.print("Enter number of players: ");
       int numPlayers = in.nextInt();
 
-      board = new Board(numPlayers);
+      board = new Board(numPlayers, roomArr);
 
       System.out.println();
-      
+
       board.createGame();
-      Player active = board.getCurrentPlayer();
-      System.out.println("Active player: ");
-      System.out.print(active);
+      board.runGame();
     }
 }

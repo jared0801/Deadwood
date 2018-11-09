@@ -37,6 +37,10 @@ public class Room {
       currentScene.wrap();
     }
 
+    public boolean getSceneActive() {
+      return currentScene.getActive();
+    }
+
     public int getCurrentShots() {
       return currentShots;
     }
