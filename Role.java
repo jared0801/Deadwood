@@ -5,29 +5,30 @@ public class Role {
     private boolean isTaken;
 
     public Role(String newName, int rank, String newLine) {
-        name = newName;
-        reqRank = rank;
-        isTaken = false;
-        line = newLine;
+      name = newName;
+      reqRank = rank;
+      isTaken = false;
+      line = newLine;
     }
 
     public String toString() {
-        return ("name: " + name + "\nrank: " + reqRank + "\nline: " + line);
+      return "name: " + name + "\nrank: " + reqRank + "\nline: " + line;
     }
 
     public int getRank() {
-	return reqRank;
+      return reqRank;
     }
 
     public String getLine() {
-        return line;
+      return line;
     }
 
     public boolean checkTaken() {
-	return isTaken;
+      return isTaken;
     }
 
     public void take() {
-	return;
+      isTaken = true;
+      return;
     }
 }

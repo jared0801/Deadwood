@@ -10,51 +10,53 @@ public class Scene {
     private List<Role> roles;
 
     public Scene (String newName, int budg, String img, List<Role> sceneRoles, int num, String desc) {
-        name = newName;
-        budget = budg;
-        imgFile = img;
-        roles = sceneRoles;
-        number = num;
-        description = desc;
+      name = newName;
+      budget = budg;
+      imgFile = img;
+      roles = sceneRoles;
+      number = num;
+      description = desc;
+      isActive = true;
     }
-    
+
     public int getBudget() {
-	    return budget;
+      return budget;
     }
 
     public String getName() {
-        return name;
+      return name;
     }
 
     public List<Role> getRoles() {
-	return roles;
+      return roles;
     }
 
     public String getImgFile() {
-        return imgFile;
+      return imgFile;
     }
 
     public int getNum() {
-        return number;
+      return number;
     }
 
     public boolean getActive() {
-	return isActive;
+      return isActive;
     }
 
     public String getDesc() {
-        return description;
+      return description;
     }
 
     public void wrap() {
-	return;
+      isActive = false;
+      return;
     }
 
     public String toString() {
-        String ret = ("name: " + name + "\nbudget: " + budget + "\nnumber: " + number + "\ndescription: " + description + "\n");
-        for(int i = 0; i < roles.size(); i++) {
-            ret += roles.get(i) + "\n";
-        }
-        return ret;
-    }
+      String ret = "name: " + name + "\nbudget: " + budget + "\nnumber: " + number + "\ndescription: " + description + "\n";
+      for(int i = 0; i < roles.size(); i++) {
+          ret += roles.get(i) + "\n";
+      }
+      return ret;
+     }
 }

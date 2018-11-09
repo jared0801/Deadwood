@@ -7,31 +7,37 @@ public class Room {
     private Role[] offCardRoles;
 
     public Room(String newName, int shots) {
-	name = newName;
-	shotCounter = shots;
+      name = newName;
+      shotCounter = shots;
     }
-    
-    public void setScene(Scene newsScene) {
-	return;
+
+    public void setScene(Scene newScene) {
+      currentScene = newScene;
+      return;
     }
 
     public Scene getScene() {
-	return currentScene;
+      return currentScene;
     }
 
     public Room[] getNeighbors() {
-	return neighborRooms;
+      return neighborRooms;
     }
 
     public Role[] getOffCardRoles() {
-	return offCardRoles;
+      return offCardRoles;
     }
 
     public int shootScene() {
-	return 0;
+      currentShots++;
+      return shotCounter - currentShots;
+    }
+
+    public void wrapScene() {
+      currentScene.wrap();
     }
 
     public int getCurrentShots() {
-	return currentShots;
+      return currentShots;
     }
 }
