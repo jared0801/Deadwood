@@ -5,6 +5,7 @@ public class Player {
     private int dollars, credits, rank, chips;
     private boolean hasRole;
     private Role currentRole;
+    private Room currentRoom;
 
     public Player (String newName) {
       name = newName;
@@ -13,6 +14,7 @@ public class Player {
       rank = 1;
       hasRole = false;
       currentRole = null;
+      currentRoom = null;
       chips = 0;
     }
 
@@ -38,6 +40,10 @@ public class Player {
       return currentRole;
     }
 
+    public Room getRoom() {
+      return currentRoom;
+    }
+
     public int act() {
       int result = rollDice(1) + chips;
       return result;
@@ -48,7 +54,8 @@ public class Player {
       return;
     }
 
-    public void move() {
+    public void moveTo(Room newRoom) {
+      currentRoom = newRoom;
       return;
     }
 

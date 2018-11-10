@@ -6,14 +6,16 @@ public class Board {
     private List<Player> players;
     private Room[] rooms;
     private Scanner in;
+    private List<Scene> scenes;
 
-    public Board(int numPlayers, Room[] roomArr) {
+    public Board(int numPlayers, Room[] roomArr, List<Scene> sceneArr) {
       totalPlayers = numPlayers;
       players = new ArrayList<Player>(numPlayers);
       rooms = roomArr;
       currentDay = 0;
       totalDays = 3;
       in = new Scanner(System.in);
+      scenes = sceneArr;
     }
 
     public void runGame() {
@@ -39,6 +41,10 @@ public class Board {
     public void newDay() {
       currentDay++;
 
+      for(int i = 0; i < totalPlayers; i++) {
+        movePlayer(players.get(i), "trailer");
+        System.out.format("Moved player %d to trailers\n", i + 1);
+      }
       // logic for moving players to the trailer and assigning scenes to rooms
 
       return;
@@ -75,14 +81,56 @@ public class Board {
     }
 
     public void takeTurn() {
+      Player currPlayer = players.get(activePlayerIndex);
       System.out.format("Player %d enter move: ", activePlayerIndex + 1);
-      String move = in.next();
-      System.out.format("Player %d entered \"%s\"!\n", activePlayerIndex + 1, move);
+      String command = in.next();
+      String arg = "";
+      System.out.format("Player %d entered \"%s\"!\n", activePlayerIndex + 1, command);
 
-      // logic for checking entered move
+      switch(command) {
+        case "move": arg = in.next();
+                     movePlayer(currPlayer, arg);
+                     break;
+        case "list": arg = in.next();
+                     if(arg.equals("rooms")) {
+                       for(int i = 0; i < rooms.length; i++) {
+                         System.out.format("%s\n", rooms[i].getName());
+                       }
+                       break;
+                     }
+
+        default: System.out.format("Invalid command entered: %s\n", command);
+                 break;
+      }
 
       activePlayerIndex = (activePlayerIndex + 1) % totalPlayers;
       return;
+    }
+
+    public void movePlayer(Player currPlayer, String roomStr) {
+      Room current = currPlayer.getRoom();
+      Room target = getRoomByName(roomStr);
+      if(target == null) {
+        System.out.format("Error: Room %s not found\n", roomStr);
+        return;
+      }
+      if(!roomStr.equals("trailer")) {
+        if(current.checkIfNeighbor(roomStr)) {
+          currPlayer.moveTo(target);
+        }
+      }
+      else {
+        currPlayer.moveTo(target);
+      }
+    }
+
+    private Room getRoomByName(String name) {
+      for(int i = 0; i < rooms.length; i++) {
+        if(rooms[i].getName().equals(name)) {
+          return rooms[i];
+        }
+      }
+      return null;
     }
 
     private boolean checkDayCont() {
@@ -90,8 +138,11 @@ public class Board {
       int scenesRemaining = 0;
       for(int i = 0; i < rooms.length; i++) {
         currentRoom = rooms[i];
-        if(currentRoom.getSceneActive()) {
-          scenesRemaining++;
+        System.out.println(currentRoom.getName());
+        if(!currentRoom.getName().equals("trailer") && !currentRoom.getName().equals("office")) {
+          if(currentRoom.getSceneActive()) {
+            scenesRemaining++;
+          }
         }
       }
       if(scenesRemaining < 2) {

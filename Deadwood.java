@@ -1,5 +1,6 @@
 import org.w3c.dom.Document;
 import java.util.Scanner;
+import java.util.*;
 
 public class Deadwood {
     public static void main(String args[]) {
@@ -11,21 +12,20 @@ public class Deadwood {
       String sceneXml = args[0];
       String boardXml = args[1];
 
-      Scene[] sceneArr = null;
+      List<Scene> sceneArr = null;
       Room[] roomArr = null;
       Board board;
       Scanner in = new Scanner(System.in);
 
       Document sceneDoc;
+      Document boardDoc;
       XMLParse parser = new XMLParse();
       try {
           sceneDoc = parser.getDocFromFile(sceneXml);
           sceneArr = parser.parseScenes(sceneDoc);
 
-          System.out.println(sceneArr.length);
-          for(int i = 0; i < sceneArr.length; i++) {
-              System.out.println(sceneArr[i]);
-          }
+          boardDoc = parser.getDocFromFile(boardXml);
+          roomArr = parser.parseBoard(boardDoc);
       } catch (Exception e) {
           System.out.println("Error = " + e);
       }
@@ -33,7 +33,7 @@ public class Deadwood {
       System.out.print("Enter number of players: ");
       int numPlayers = in.nextInt();
 
-      board = new Board(numPlayers, roomArr);
+      board = new Board(numPlayers, roomArr, sceneArr);
 
       System.out.println();
 
