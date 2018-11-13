@@ -18,6 +18,10 @@ public class Player {
       chips = 0;
     }
 
+    public String getName() {
+      return name;
+    }
+
     private int rollDice(int numDice) {
       int roll = 0;
       for(int i = 0; i < numDice; i++) {
@@ -26,14 +30,36 @@ public class Player {
       return roll;
     }
 
+    public int getRank() {
+      return rank;
+    }
+
     public void takeRole(Role newRole) {
       currentRole = newRole;
+      currentRole.take();
+      hasRole = true;
       chips = 0;
       return;
     }
 
     public boolean hasRole() {
       return hasRole;
+    }
+
+    public void leaveRole() {
+      currentRole.leave();
+      currentRole = null;
+      hasRole = false;
+      return;
+    }
+
+    public boolean hasSceneRole() {
+      if(hasRole) {
+        if(currentRole.checkOnScene()) {
+          return true;
+        }
+      }
+      return false;
     }
 
     public Role getRole() {
@@ -45,8 +71,7 @@ public class Player {
     }
 
     public int act() {
-      int result = rollDice(1) + chips;
-      return result;
+      return rollDice(1) + chips;
     }
 
     public void rehearse() {
@@ -82,10 +107,15 @@ public class Player {
       return credits;
     }
 
+    public int getChips() {
+      return chips;
+    }
+
     public String toString() {
-      String ret = "name: " + name + "\nrank: " + rank + "\ndollars: " + dollars + "\ncredits: " + credits + "\nchips: " + chips + "\n";
+      String ret = String.format("name: %s\nrank: %d\ndollars: %d\ncredits: %d\nchips: %d\n", name, rank, dollars, credits, chips);
+      //String ret = "name: " + name + "\nrank: " + rank + "\ndollars: " + dollars + "\ncredits: " + credits + "\nchips: " + chips + "\n";
       if(hasRole) {
-        ret += "role: " + currentRole;
+        ret += "role:\n" + currentRole;
       }
       return ret;
     }

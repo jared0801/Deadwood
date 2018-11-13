@@ -78,7 +78,7 @@ public class XMLParse {
                         }
                     }
 
-                    sceneRoles.add(new Role(name, rank, line));
+                    sceneRoles.add(new Role(name, rank, line, true));
                 }
             }
 
@@ -212,7 +212,7 @@ public class XMLParse {
                                     }
                                 }
 
-                                boardRoles.add(new Role(partName, partLvl, partLine));
+                                boardRoles.add(new Role(partName, partLvl, partLine, false));
                             }
                         }
                     }

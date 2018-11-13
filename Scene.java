@@ -31,6 +31,15 @@ public class Scene {
       return roles;
     }
 
+    public boolean checkIfRolesTaken() {
+      for(int i = 0; i < roles.size(); i++) {
+        if(roles.get(i).checkTaken()) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     public String getImgFile() {
       return imgFile;
     }
@@ -53,9 +62,10 @@ public class Scene {
     }
 
     public String toString() {
-      String ret = "name: " + name + "\nbudget: " + budget + "\nnumber: " + number + "\ndescription: " + description + "\n";
+      String ret = String.format("name: %s\nbudget: %d\ndescription: %s\n", name, budget, description);
+      //String ret = "name: " + name + "\nbudget: " + budget + "\nnumber: " + number + "\ndescription: " + description + "\n";
       for(int i = 0; i < roles.size(); i++) {
-          ret += roles.get(i) + "\n";
+          ret += roles.get(i);
       }
       return ret;
      }
