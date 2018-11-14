@@ -47,9 +47,11 @@ public class Player {
     }
 
     public void leaveRole() {
-      currentRole.leave();
-      currentRole = null;
-      hasRole = false;
+      if(currentRole != null) {
+        currentRole.leave();
+        currentRole = null;
+        hasRole = false;
+      }
       return;
     }
 

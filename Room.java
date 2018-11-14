@@ -27,6 +27,7 @@ public class Room {
     }
 
     public void setScene(Scene newScene) {
+      currentShots = 0;
       currentScene = newScene;
       return;
     }
@@ -103,8 +104,9 @@ public class Room {
     }
 
     public void wrapScene() {
-      currentScene.wrap();
-
+      if(currentScene != null) {
+        currentScene.wrap();
+      }
     }
 
     public boolean getSceneActive() {

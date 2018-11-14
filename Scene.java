@@ -7,6 +7,7 @@ public class Scene {
     private int number;
     private int budget;
     private boolean isActive;
+    private boolean isAssigned;
     private List<Role> roles;
 
     public Scene (String newName, int budg, String img, List<Role> sceneRoles, int num, String desc) {
@@ -17,6 +18,7 @@ public class Scene {
       number = num;
       description = desc;
       isActive = true;
+      isAssigned = false;
     }
 
     public int getBudget() {
@@ -52,12 +54,21 @@ public class Scene {
       return isActive;
     }
 
+    public boolean getAssigned() {
+      return isAssigned;
+    }
+
     public String getDesc() {
       return description;
     }
 
     public void wrap() {
       isActive = false;
+      return;
+    }
+
+    public void assign() {
+      isAssigned = true;
       return;
     }
 

@@ -45,6 +45,7 @@ public class Board {
 
       for(int i = 0; i < totalPlayers; i++) {
         movePlayer(players.get(i), "trailer");
+        players.get(i).leaveRole();
         System.out.format("Moved player %d to trailers\n", i + 1);
       }
 
@@ -54,8 +55,11 @@ public class Board {
           boolean notAssigned = true;
           while(notAssigned) {
             int sceneIndex = (int) (Math.random() * 40);
-            if(scenes.get(sceneIndex).getActive()) {
-              rooms[i].setScene(scenes.get(sceneIndex));
+            Scene sceneRef = scenes.get(sceneIndex);
+            if(sceneRef.getActive() && !sceneRef.getAssigned()) {
+              rooms[i].setScene(sceneRef);
+              sceneRef.assign();
+              System.out.format("Assigned scene \'%s\' to room \'%s\'\n", sceneRef.getName(), rooms[i].getName());
               notAssigned = false;
             }
           }
@@ -121,6 +125,7 @@ public class Board {
                         System.out.println("- take role role_name: Takes the role specified by role_name");
                         System.out.println("- act: Acts under the current role");
                         System.out.println("- rehearse: Rehearses under the current role");
+                        System.out.println("- end: ends the active player's turn");
                         break;
 
           case "move":  if(lineScan.hasNext()) {
@@ -309,6 +314,14 @@ public class Board {
                               System.out.println("Player does not have a role or has too many chips");
                             }
                             break;
+
+          // cheats
+          case "deactivate":  currPlayer.getRoom().wrapScene();
+                              turnContinue = false;
+                              break;
+
+          case "money": modifyMoney(100, 100, currPlayer);
+                        break;
 
           case "end":       turnContinue = false;
                             break;
