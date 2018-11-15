@@ -14,6 +14,7 @@ public class Deadwood {
 
       List<Scene> sceneArr = null;
       Room[] roomArr = null;
+      int[][] upgrades = null;
       Board board;
       Scanner in = new Scanner(System.in);
 
@@ -26,6 +27,7 @@ public class Deadwood {
 
           boardDoc = parser.getDocFromFile(boardXml);
           roomArr = parser.parseBoard(boardDoc);
+          upgrades = parser.parseUpgrades(boardDoc);
       } catch (Exception e) {
           System.out.println("Error = " + e);
       }
@@ -33,7 +35,7 @@ public class Deadwood {
       System.out.print("Enter number of players: ");
       int numPlayers = in.nextInt();
 
-      board = new Board(numPlayers, roomArr, sceneArr);
+      board = new Board(numPlayers, roomArr, sceneArr, upgrades);
 
       System.out.println();
 

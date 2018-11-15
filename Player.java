@@ -91,14 +91,12 @@ public class Player {
       return;
     }
 
-    public void modifyDollars(int amount) {
-      dollars += amount;
-      return;
+    public int modifyDollars(int amount) {
+      return dollars += amount;
     }
 
-    public void modifyCredits(int amount) {
-      credits += amount;
-      return;
+    public int modifyCredits(int amount) {
+      return credits += amount;
     }
 
     public int getDollars() {

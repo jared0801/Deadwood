@@ -112,8 +112,6 @@ public class XMLParse {
             if("set".equals(setNode.getNodeName()))
             {
                 setName = setNode.getAttributes().getNamedItem("name").getNodeValue();
-                //System.out.println("Set " + (++setCount) + ": " + setName);
-
                 NodeList children = setNode.getChildNodes();
                 int count = 0;
                 for (int j=0; j< children.getLength(); j++){
@@ -316,7 +314,41 @@ public class XMLParse {
                         w = sub.getAttributes().getNamedItem("w").getNodeValue();
                         //System.out.println(x + " " + y + " " + h + " " + w);
                     }
-                    else if("upgrades".equals(sub.getNodeName())){
+                }
+                newRooms[setCount++] = new Room(setName, neighborNames);
+            }
+        }
+        return newRooms;
+    }
+
+
+
+
+    public int[][] parseUpgrades(Document d){
+
+        Element root = d.getDocumentElement();
+
+        NodeList sets = root.getElementsByTagName("set");
+        int roomNum = sets.getLength();
+
+        int officeUpgrades[][] = new int[2][5];
+
+
+        
+        NodeList offices = root.getElementsByTagName("office");
+        for (int i=0; i < offices.getLength();i++){
+
+            //reads data from the nodes
+            Node office = offices.item(i);
+            String setName = "office";
+            ArrayList<String> neighborNames = new ArrayList<>();
+            if("office".equals(office.getNodeName()))
+            {
+                NodeList children = office.getChildNodes();
+                int count = 0;
+                for (int j=0; j< children.getLength(); j++){
+                    Node sub = children.item(j);
+                    if("upgrades".equals(sub.getNodeName())){
                         NodeList upgrades = sub.getChildNodes();
                         for (int k = 0; k < upgrades.getLength(); k++)
                         {
@@ -355,9 +387,8 @@ public class XMLParse {
                         }
                     }
                 }
-                newRooms[setCount++] = new Room(setName, neighborNames);
             }
         }
-        return newRooms;
+        return officeUpgrades;
     }
 }

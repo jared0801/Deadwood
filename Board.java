@@ -9,8 +9,9 @@ public class Board {
     private Scanner in;
     private Scanner lineScan;
     private List<Scene> scenes;
+    private int[][] upgrades;
 
-    public Board(int numPlayers, Room[] roomArr, List<Scene> sceneArr) {
+    public Board(int numPlayers, Room[] roomArr, List<Scene> sceneArr, int[][] upgradeCosts) {
       totalPlayers = numPlayers;
       players = new ArrayList<Player>(numPlayers);
       rooms = roomArr;
@@ -18,6 +19,7 @@ public class Board {
       totalDays = 3;
       in = new Scanner(System.in);
       scenes = sceneArr;
+      upgrades = upgradeCosts;
     }
 
     public void runGame() {
@@ -133,7 +135,7 @@ public class Board {
                           while(lineScan.hasNext()) {
                             arg += " " + lineScan.next();
                           }
-
+                          
                           if(!hasMoved && !currPlayer.hasRole()) {
                             if(movePlayer(currPlayer, arg)) {
                               hasMoved = true;
@@ -315,6 +317,50 @@ public class Board {
                             }
                             break;
 
+          case "upgrade": if(lineScan.hasNext()) {
+                            arg = lineScan.next();
+                            int target = Integer.parseInt(arg);
+                            if(target > 6 || target < 2) {
+                              System.out.println("You can't upgrade to that level.");
+                              break;
+                            }else{
+                              if(currPlayer.getRoom().getName() == "office")
+                              {
+                                System.out.println("That will cost you " + upgrades[0][target-2] + " money or " + upgrades[1][target-2] + " credits.");
+                                System.out.println("Press 1 to pay with money, 2 to pay with credits.");
+                                String payline = in.nextLine();
+                                Scanner paymentLineScan = new Scanner(payline);
+                                if(paymentLineScan.hasNext())
+                                {
+                                  String paycommand = paymentLineScan.next();
+                                  int paymentMethod = Integer.parseInt(paycommand);
+                                  if(paymentMethod == 1)
+                                  {
+                                    if(currPlayer.getDollars() >= upgrades[0][target-2]) {
+                                      currPlayer.modifyDollars(upgrades[0][target-2]);
+                                      currPlayer.upgradeToRank(target);
+                                    } else {
+                                      System.out.println("You don't have enough money to upgrade.");
+                                    }
+                                  } else {
+                                    if(currPlayer.getCredits() >= upgrades[1][target-2]) {
+                                      currPlayer.modifyCredits(upgrades[1][target-2]);
+                                      currPlayer.upgradeToRank(target);
+                                    } else {
+                                      System.out.println("You don't have enough credits to upgrade.");
+                                    }
+                                  }
+                                }
+                              } else {
+                                System.out.println("You must be at the casting office to upgrade!");
+                              }
+                            }
+                          }else{
+                            // No upgrade value provided
+                            System.out.println("Command requires arguments");
+                          }
+                          break;
+
           // cheats
           case "deactivate":  currPlayer.getRoom().wrapScene();
                               turnContinue = false;
@@ -349,6 +395,8 @@ public class Board {
       if(!roomStr.equals("trailer")) {
         if(current.checkIfNeighbor(roomStr)) {
           currPlayer.moveTo(target);
+        }else{
+          System.out.println("Not a neighbor. Try again.");
         }
       }
       else {
