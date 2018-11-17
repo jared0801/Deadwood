@@ -22,6 +22,9 @@ public class Board {
       upgrades = upgradeCosts;
     }
 
+    /* function runGame
+       purpose: runs the initilized Deadwood game, part of the public interface
+    */
     public void runGame() {
       while(true) {
         runDay();
@@ -33,6 +36,9 @@ public class Board {
       }
     }
 
+    /* function runDay
+       purpose: handles running each day
+    */
     private void runDay() {
       System.out.format("\nDay %d\n", currentDay);
       boolean running = true;
@@ -42,15 +48,19 @@ public class Board {
       }
     }
 
+    /* function newDay
+       purpose: handles the creation of new days
+    */
     private void newDay() {
       currentDay++;
 
+      // move all players to the starting trailer room
       for(int i = 0; i < totalPlayers; i++) {
         forceMovePlayer(players.get(i), "trailer");
         players.get(i).leaveRole();
-        //System.out.format("Moved player %d to trailers\n", i + 1);
       }
 
+      // assign scenes to rooms
       for(int i = 0; i < rooms.length; i++) {
         String name = rooms[i].getName();
         if(!name.equals("trailer") && !name.equals("office")) {
@@ -61,7 +71,6 @@ public class Board {
             if(sceneRef.getActive() && !sceneRef.getAssigned()) {
               rooms[i].setScene(sceneRef);
               sceneRef.assign();
-              //System.out.format("Assigned scene \'%s\' to room \'%s\'\n", sceneRef.getName(), rooms[i].getName());
               notAssigned = false;
             }
           }
@@ -71,6 +80,9 @@ public class Board {
       return;
     }
 
+    /* function createGame
+       purpose: handles creating the game, part of the public interface
+    */
     public void createGame() {
       for(int i = 0; i < totalPlayers; i++) {
         System.out.format("Enter Player %d name: ", i + 1);
@@ -84,6 +96,9 @@ public class Board {
       return;
     }
 
+    /* function endGame
+       purpose: handles the gameover event for Deadwood
+    */
     private void endGame() {
       int maxScore = 0;
       Player winner = null;
@@ -101,6 +116,11 @@ public class Board {
       return;
     }
 
+    /* function calcScore
+       purpose: calculates the final score for a given Player, following the score formula
+       parameters: target, Player to find the score for
+       returns: calculated score
+    */
     private int calcScore(Player target) {
       return target.getDollars() + target.getCredits() + (target.getRank() * 5);
     }
@@ -117,6 +137,9 @@ public class Board {
       return players.get(activePlayerIndex);
     }
 
+    /* function takeTurn
+       purpose: handles all of the logic for allowing the active Player to take their turn
+    */
     private void takeTurn() {
       Player currPlayer = getCurrentPlayer();
       boolean turnContinue = true;
@@ -128,6 +151,8 @@ public class Board {
       for(int i = 0; i < players.size(); i++) {
         System.out.format("Player %s is currently located in the %s\n", players.get(i).getName(), players.get(i).getRoom().getName());
       }
+
+      /* turn loop */
       while(turnContinue) {
         System.out.format("Player %s enter move: ", currPlayer.getName());
         line = in.nextLine();
@@ -449,9 +474,12 @@ public class Board {
       return;
     }
 
-
-    // returns true if move is valid and player has been moved
-    // false otherwise
+    /* function movePlayer
+       purpose: attempts to move a Player to a given room
+       parameters: currPlayer, Player object to move
+                   roomStr, name of the target Room
+       returns: true if successful, false otherwise
+    */
     private boolean movePlayer(Player currPlayer, String roomStr) {
       Room currRoom = currPlayer.getRoom();
       Room target = getRoomByName(roomStr);
@@ -472,6 +500,11 @@ public class Board {
       return true;
     }
 
+    /* function forceMovePlayer
+       purpose: forcefully moves a Player to a given room. used for testing purposes only
+       parameters: currPlayer, Player object to move
+                   roomStr, name of the target Room
+    */
     private void forceMovePlayer(Player currPlayer, String roomStr) {
       Room target = getRoomByName(roomStr);
       if(target == null) {
@@ -483,6 +516,11 @@ public class Board {
       return;
     }
 
+    /* function getRoomByName
+       purpose: finds a Room, given its name
+       parameters: name, string name of the target room
+       returns: Room if found, null otherwise
+    */
     private Room getRoomByName(String name) {
       for(int i = 0; i < rooms.length; i++) {
         if(rooms[i].getName().equals(name)) {
@@ -492,6 +530,9 @@ public class Board {
       return null;
     }
 
+    /* function checkDayCont
+       purpose: checks if the day should continue or end
+    */
     private boolean checkDayCont() {
       Room currentRoom;
       int scenesRemaining = 0;
@@ -509,12 +550,23 @@ public class Board {
       return true;
     }
 
+    /* function modifyMoney
+       purpose: dual-purpose function to modify both the dollar and credits of a given player
+       parameters: dollars, number of dollars to add or subtract
+                   credits, number of credits to add or subtract
+                   target, Player to modify
+    */
     private void modifyMoney(int dollars, int credits, Player target) {
       target.modifyDollars(dollars);
       target.modifyCredits(credits);
       return;
     }
 
+    /* function generatePayout
+       purpose: generates an Integer List of dice rolls, sorted in descending order
+       parameters: budget, the length of the requested list
+       returns: Integer List
+    */
     private List<Integer> generatePayout(int budget) {
       List<Integer> ret = new ArrayList<Integer>();
       for(int i = 0; i < budget; i++) {
@@ -525,6 +577,11 @@ public class Board {
       return ret;
     }
 
+    /* function getPlayersInRoom
+       purpose: generates a list of all players in a given room
+       parameters: target, the Room to check within
+       returns: List of Players in the room
+    */
     private List<Player> getPlayersInRoom(Room target) {
       List<Player> ret = new ArrayList<Player>();
       String name = target.getName();
@@ -536,6 +593,11 @@ public class Board {
       return ret;
     }
 
+    /* function getPlayerByName
+       purpose: finds a player given its name
+       parameters: target, the name of the desired Player
+       returns: Player that corresponds to the given name, null if not found
+    */
     private Player getPlayerByName(String target) {
       for(int i = 0; i < players.size(); i++) {
         if(players.get(i).getName().equals(target)) {
@@ -545,6 +607,12 @@ public class Board {
       return null;
     }
 
+    /* function getPlayerInRole
+       purpose: finds the player that has taken the given role, if any
+       parameters: target, the given Role to check
+                   roomPlayers, a list of Players that are in the same room as the Role
+       returns: Player that has the role, null if not found
+    */
     private Player getPlayerInRole(Role target, List<Player> roomPlayers) {
       for(int i = 0; i < roomPlayers.size(); i++) {
         Player curr = roomPlayers.get(i);
