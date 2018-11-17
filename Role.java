@@ -2,19 +2,19 @@ public class Role {
     private String name;
     private String line;
     private int reqRank;
-    private boolean isTaken;
+    private boolean taken;
     private boolean onScene;
 
     public Role(String newName, int rank, String newLine, boolean cardStatus) {
       name = newName;
       reqRank = rank;
-      isTaken = false;
+      taken = false;
       onScene = cardStatus;
       line = newLine;
     }
 
     public String toString() {
-      String ret = String.format("name: %s\nrank: %d\nline: %s\ntaken: %b\non scene: %b\n\n", name, reqRank, line, isTaken, onScene);
+      String ret = String.format("name: %s\nrank: %d\nline: %s\ntaken: %b\non scene: %b\n\n", name, reqRank, line, taken, onScene);
       //return "name: " + name + "\nrank: " + reqRank + "\nline: " + line + "\ntaken: " + isTaken;
       return ret;
     }
@@ -31,21 +31,21 @@ public class Role {
       return line;
     }
 
-    public boolean checkTaken() {
-      return isTaken;
+    public boolean isTaken() {
+      return taken;
     }
 
-    public boolean checkOnScene() {
+    public boolean isOnScene() {
       return onScene;
     }
 
     public void take() {
-      isTaken = true;
+      taken = true;
       return;
     }
 
     public void leave() {
-      isTaken = false;
+      taken = false;
       return;
     }
 }

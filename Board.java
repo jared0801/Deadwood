@@ -33,7 +33,7 @@ public class Board {
       }
     }
 
-    public void runDay() {
+    private void runDay() {
       System.out.format("\nDay %d\n", currentDay);
       boolean running = true;
       while(running) {
@@ -42,13 +42,13 @@ public class Board {
       }
     }
 
-    public void newDay() {
+    private void newDay() {
       currentDay++;
 
       for(int i = 0; i < totalPlayers; i++) {
-        movePlayer(players.get(i), "trailer");
+        forceMovePlayer(players.get(i), "trailer");
         players.get(i).leaveRole();
-        System.out.format("Moved player %d to trailers\n", i + 1);
+        //System.out.format("Moved player %d to trailers\n", i + 1);
       }
 
       for(int i = 0; i < rooms.length; i++) {
@@ -61,7 +61,7 @@ public class Board {
             if(sceneRef.getActive() && !sceneRef.getAssigned()) {
               rooms[i].setScene(sceneRef);
               sceneRef.assign();
-              System.out.format("Assigned scene \'%s\' to room \'%s\'\n", sceneRef.getName(), rooms[i].getName());
+              //System.out.format("Assigned scene \'%s\' to room \'%s\'\n", sceneRef.getName(), rooms[i].getName());
               notAssigned = false;
             }
           }
@@ -84,10 +84,25 @@ public class Board {
       return;
     }
 
-    public void endGame() {
+    private void endGame() {
+      int maxScore = 0;
+      Player winner = null;
+      for(int i = 0; i < players.size(); i++) {
+        int score = calcScore(players.get(i));
+        System.out.format("Player %s has %d points\n", players.get(i).getName(), score);
+        if(maxScore < score) {
+          maxScore = score;
+          winner = players.get(i);
+        }
+      }
+      System.out.format("Player %s won with %d points\n", winner.getName(), maxScore);
       System.out.println("Gameover, thank you for playing Deadwood!");
       in.close();
       return;
+    }
+
+    private int calcScore(Player target) {
+      return target.getDollars() + target.getCredits() + (target.getRank() * 5);
     }
 
     public List<Player> getPlayers() {
@@ -102,17 +117,20 @@ public class Board {
       return players.get(activePlayerIndex);
     }
 
-    public void takeTurn() {
+    private void takeTurn() {
       Player currPlayer = getCurrentPlayer();
       boolean turnContinue = true;
       boolean hasMoved = false;
       String line = "";
       String command = "";
       String arg = "";
+      System.out.println();
+      for(int i = 0; i < players.size(); i++) {
+        System.out.format("Player %s is currently located in the %s\n", players.get(i).getName(), players.get(i).getRoom().getName());
+      }
       while(turnContinue) {
-        System.out.format("Player %d enter move: ", activePlayerIndex + 1);
+        System.out.format("Player %s enter move: ", currPlayer.getName());
         line = in.nextLine();
-        System.out.format("Player %d entered \'%s\'!\n", activePlayerIndex + 1, line);
         lineScan = new Scanner(line);
         command = lineScan.next();
 
@@ -127,6 +145,7 @@ public class Board {
                         System.out.println("- take role role_name: Takes the role specified by role_name");
                         System.out.println("- act: Acts under the current role");
                         System.out.println("- rehearse: Rehearses under the current role");
+                        System.out.println("- upgrade rank_num: Upgrades the player's rank to rank_num and deducts the appropriate amount of currency");
                         System.out.println("- end: ends the active player's turn");
                         break;
 
@@ -135,7 +154,7 @@ public class Board {
                           while(lineScan.hasNext()) {
                             arg += " " + lineScan.next();
                           }
-                          
+
                           if(!hasMoved && !currPlayer.hasRole()) {
                             if(movePlayer(currPlayer, arg)) {
                               hasMoved = true;
@@ -146,7 +165,7 @@ public class Board {
                           }
                         }
                         else {
-                          System.out.println("Command requires arguments");
+                          System.out.println("Command requires additional arguments");
                         }
                         break;
 
@@ -165,7 +184,7 @@ public class Board {
                           }
                         }
                         else {
-                          System.out.println("Command requires arguments");
+                          System.out.println("Command requires additional arguments");
                         }
                         break;
 
@@ -221,7 +240,7 @@ public class Board {
                           }
                         }
                         else {
-                          System.out.println("Command requires arguments");
+                          System.out.println("Command requires additional arguments");
                         }
                         break;
 
@@ -234,19 +253,25 @@ public class Board {
                                 arg += " " + lineScan.next();
                               }
                               Role target = currPlayer.getRoom().getRoleByName(arg);
-                              if(target == null || !currPlayer.getRoom().getSceneActive()) {
+                              if(target == null) {
                                 System.out.format("Unrecognized role: \'%s\'\n", arg);
                               }
-                              else if(target.getRank() <= currPlayer.getRank() && !target.checkTaken()) {
+                              else if(!currPlayer.getRoom().getSceneActive()) {
+                                System.out.println("Current room does not have an active scene");
+                              }
+                              else if(target.isTaken()) {
+                                System.out.println("Requested role is already taken");
+                              }
+                              else if(target.getRank() <= currPlayer.getRank()) {
                                 currPlayer.takeRole(target);
                                 turnContinue = false;
                               }
                               else {
-                                System.out.format("Player not high enough level for requested role, scene wrapped, or role already taken\n", target.getRank(), currPlayer.getRank());
+                                System.out.format("Player not high enough level for requested role (required: %d, player rank: %d)\n", target.getRank(), currPlayer.getRank());
                               }
                             }
                             else {
-                              System.out.println("Command requires arguments");
+                              System.out.println("Command requires additional arguments");
                             }
                           }
                           else {
@@ -254,7 +279,7 @@ public class Board {
                           }
                         }
                         else {
-                          System.out.println("Command requires arguments");
+                          System.out.println("Command requires additional arguments");
                         }
                         break;
 
@@ -265,33 +290,61 @@ public class Board {
                         if(currPlayer.hasRole()) {
                           budget = current.getSceneDifficulty();
                           roll = currPlayer.act();
+                          System.out.format("Acting on role \'%s\'\n", currPlayer.getRole().getName());
                           System.out.format("Player rolled %d with budget %d\n", roll, budget);
                           result = current.shootScene(roll);
                           if(result >= 0) {
                             System.out.print("Roll successful, ");
                             if(currPlayer.hasSceneRole()) {
-                              System.out.println("player earns 2 credits");
+                              System.out.println("Player earns 2 credits");
                               modifyMoney(0, 2, currPlayer);
                             }
                             else {
-                              System.out.println("player earns 1 credit and 1 dollar");
+                              System.out.println("Player earns 1 credit and 1 dollar");
                               modifyMoney(1, 1, currPlayer);
                             }
 
                             if(result == 0) {
                               System.out.println("All shots completed, scene wrap");
-                              current.wrapScene();
 
-                              // payout bonuses and remove players from their roles
                               List<Player> playersInRoom = getPlayersInRoom(current);
+
+                              // payout bonuses to players in roles
+                              if(current.checkIfSceneRolesTaken()) {
+
+                                // payout bonuses to players in scene roles
+                                List<Integer> bonuses = generatePayout(budget);
+                                List<Role> sceneRoles = current.getSceneRoles();
+                                int roleIndex = sceneRoles.size() - 1;
+                                Player target;
+                                System.out.format("Bonus dice rolled: %s\n", bonuses.toString());
+                                for(int i = 0; i < bonuses.size(); i++) {
+                                  if(sceneRoles.get(roleIndex).isTaken()) {
+                                    target = getPlayerInRole(sceneRoles.get(roleIndex), playersInRoom);
+                                    System.out.format("Player %s receives %d dollars\n", target.getName(), bonuses.get(i));
+                                    modifyMoney(bonuses.get(i), 0, target);
+                                  }
+                                  roleIndex--;
+                                  if(roleIndex < 0) {
+                                    roleIndex = sceneRoles.size() - 1;
+                                  }
+                                }
+
+                                // payout bonuses to players in room roles
+                                for(int i = 0; i < playersInRoom.size(); i++) {
+                                  target = playersInRoom.get(i);
+                                  if(target.hasRole() && !target.hasSceneRole()) {
+                                    System.out.format("Player %s receives %d dollars\n", target.getName(), target.getRole().getRank());
+                                    modifyMoney(target.getRole().getRank(), 0, target);
+                                  }
+                                }
+                              }
+
+                              // remove players from their roles
                               for(int i = 0; i < playersInRoom.size(); i++) {
                                 playersInRoom.get(i).leaveRole();
                               }
-
-                              // int[] bonuses = generatePayout(budget);
-                              // if(current.checkIfSceneRolesTaken()) {
-                              //
-                              // }
+                              current.wrapScene();
                             }
                           }
                           else if(!currPlayer.hasSceneRole()) {
@@ -310,6 +363,7 @@ public class Board {
 
           case "rehearse":  if(currPlayer.hasRole() && currPlayer.getChips() < currPlayer.getRoom().getSceneDifficulty()) {
                               currPlayer.rehearse();
+                              System.out.format("Player %s now has %d chips (scene budget: %d)\n", currPlayer.getName(), currPlayer.getChips(), currPlayer.getRoom().getSceneDifficulty());
                               turnContinue = false;
                             }
                             else {
@@ -320,46 +374,51 @@ public class Board {
           case "upgrade": if(lineScan.hasNext()) {
                             arg = lineScan.next();
                             int target = Integer.parseInt(arg);
-                            if(target > 6 || target < 2) {
-                              System.out.println("You can't upgrade to that level.");
-                              break;
-                            }else{
-                              if(currPlayer.getRoom().getName() == "office")
+                            if(currPlayer.getRoom().getName() == "office") {
+                              if(target > 6 || target < 2) {
+                                System.out.println("You can't upgrade to that level (min 2, max 6)");
+                                break;
+                              }
+                              if(currPlayer.getRank() >= target) {
+                                System.out.format("Target rank %d is lower or equal to current rank %d\n", target, currPlayer.getRank());
+                                break;
+                              }
+                              System.out.format("Rank %d will cost you %d dollars or %d credits\n", target, upgrades[0][target-2], upgrades[1][target-2]);
+                              System.out.println("Press 1 to pay with dollars, 2 to pay with credits");
+                              String payline = in.nextLine();
+                              Scanner paymentLineScan = new Scanner(payline);
+                              if(paymentLineScan.hasNext())
                               {
-                                System.out.println("That will cost you " + upgrades[0][target-2] + " money or " + upgrades[1][target-2] + " credits.");
-                                System.out.println("Press 1 to pay with money, 2 to pay with credits.");
-                                String payline = in.nextLine();
-                                Scanner paymentLineScan = new Scanner(payline);
-                                if(paymentLineScan.hasNext())
+                                String paycommand = paymentLineScan.next();
+                                int paymentMethod = Integer.parseInt(paycommand);
+                                if(paymentMethod == 1)
                                 {
-                                  String paycommand = paymentLineScan.next();
-                                  int paymentMethod = Integer.parseInt(paycommand);
-                                  if(paymentMethod == 1)
-                                  {
-                                    if(currPlayer.getDollars() >= upgrades[0][target-2]) {
-                                      currPlayer.modifyDollars(upgrades[0][target-2]);
-                                      currPlayer.upgradeToRank(target);
-                                    } else {
-                                      System.out.println("You don't have enough money to upgrade.");
-                                    }
+                                  if(currPlayer.getDollars() >= upgrades[0][target-2]) {
+                                    currPlayer.modifyDollars(-upgrades[0][target-2]);
+                                    currPlayer.upgradeToRank(target);
                                   } else {
+                                      System.out.println("You don't have enough dollars to upgrade");
+                                  }
+                                } else {
                                     if(currPlayer.getCredits() >= upgrades[1][target-2]) {
-                                      currPlayer.modifyCredits(upgrades[1][target-2]);
+                                      currPlayer.modifyCredits(-upgrades[1][target-2]);
                                       currPlayer.upgradeToRank(target);
-                                    } else {
-                                      System.out.println("You don't have enough credits to upgrade.");
-                                    }
+                                  } else {
+                                      System.out.println("You don't have enough credits to upgrade");
                                   }
                                 }
                               } else {
-                                System.out.println("You must be at the casting office to upgrade!");
+                                // No upgrade value provided
+                                  System.out.println("Please enter a payment type (1 for dollars, 2 for credits)");
+                              }
+                            } else {
+                                System.out.println("You must be at the casting office to upgrade");
                               }
                             }
-                          }else{
-                            // No upgrade value provided
-                            System.out.println("Command requires arguments");
-                          }
-                          break;
+                            else {
+                              System.out.println("Command requires additional arguments");
+                            }
+                            break;
 
           // cheats
           case "deactivate":  currPlayer.getRoom().wrapScene();
@@ -370,6 +429,15 @@ public class Board {
                         break;
 
           case "end":       turnContinue = false;
+                            break;
+
+          case "moveForce": if(lineScan.hasNext()) {
+                              arg = lineScan.next();
+                              while(lineScan.hasNext()) {
+                                arg += " " + lineScan.next();
+                              }
+                              forceMovePlayer(currPlayer, arg);
+                            }
                             break;
 
           default:          System.out.format("Invalid command entered: %s\n", command);
@@ -384,25 +452,35 @@ public class Board {
 
     // returns true if move is valid and player has been moved
     // false otherwise
-    public boolean movePlayer(Player currPlayer, String roomStr) {
-      Room current = currPlayer.getRoom();
+    private boolean movePlayer(Player currPlayer, String roomStr) {
+      Room currRoom = currPlayer.getRoom();
       Room target = getRoomByName(roomStr);
       if(target == null) {
         System.out.format("Error: Room \'%s\' not found\n", roomStr);
         return false;
       }
 
-      if(!roomStr.equals("trailer")) {
-        if(current.checkIfNeighbor(roomStr)) {
-          currPlayer.moveTo(target);
-        }else{
-          System.out.println("Not a neighbor. Try again.");
-        }
-      }
-      else {
+      if(currRoom.checkIfNeighbor(roomStr)) {
+        System.out.format("Moving Player %s from %s to %s\n", currPlayer.getName(), currRoom.getName(), roomStr);
         currPlayer.moveTo(target);
       }
+      else {
+        System.out.println("Not a neighbor. Try again.");
+        return false;
+      }
+
       return true;
+    }
+
+    private void forceMovePlayer(Player currPlayer, String roomStr) {
+      Room target = getRoomByName(roomStr);
+      if(target == null) {
+        System.out.format("Error: Room \'%s\' not found\n", roomStr);
+        return;
+      }
+
+      currPlayer.moveTo(target);
+      return;
     }
 
     private Room getRoomByName(String name) {
@@ -431,17 +509,19 @@ public class Board {
       return true;
     }
 
-    public void modifyMoney(int dollars, int credits, Player target) {
+    private void modifyMoney(int dollars, int credits, Player target) {
       target.modifyDollars(dollars);
       target.modifyCredits(credits);
       return;
     }
 
-    private int[] generatePayout(int budget) {
-      int ret[] = new int[budget];
+    private List<Integer> generatePayout(int budget) {
+      List<Integer> ret = new ArrayList<Integer>();
       for(int i = 0; i < budget; i++) {
-        ret[i] = (int) (Math.random() * 6) + 1;
+        ret.add((int) (Math.random() * 6) + 1);
       }
+
+      Collections.sort(ret, Collections.reverseOrder());
       return ret;
     }
 
@@ -460,6 +540,18 @@ public class Board {
       for(int i = 0; i < players.size(); i++) {
         if(players.get(i).getName().equals(target)) {
           return players.get(i);
+        }
+      }
+      return null;
+    }
+
+    private Player getPlayerInRole(Role target, List<Player> roomPlayers) {
+      for(int i = 0; i < roomPlayers.size(); i++) {
+        Player curr = roomPlayers.get(i);
+        if(curr.hasRole()) {
+          if(curr.getRole().getName().equals(target.getName())) {
+            return curr;
+          }
         }
       }
       return null;

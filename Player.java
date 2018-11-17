@@ -57,7 +57,7 @@ public class Player {
 
     public boolean hasSceneRole() {
       if(hasRole) {
-        if(currentRole.checkOnScene()) {
+        if(currentRole.isOnScene()) {
           return true;
         }
       }
@@ -112,7 +112,7 @@ public class Player {
     }
 
     public String toString() {
-      String ret = String.format("name: %s\nrank: %d\ndollars: %d\ncredits: %d\nchips: %d\n", name, rank, dollars, credits, chips);
+      String ret = String.format("name: %s\nrank: %d\ndollars: %d\ncredits: %d\nchips: %d\ncurrent room: %s\n", name, rank, dollars, credits, chips, currentRoom.getName());
       //String ret = "name: " + name + "\nrank: " + rank + "\ndollars: " + dollars + "\ncredits: " + credits + "\nchips: " + chips + "\n";
       if(hasRole) {
         ret += "role:\n" + currentRole;

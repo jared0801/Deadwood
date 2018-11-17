@@ -35,7 +35,7 @@ public class Scene {
 
     public boolean checkIfRolesTaken() {
       for(int i = 0; i < roles.size(); i++) {
-        if(roles.get(i).checkTaken()) {
+        if(roles.get(i).isTaken()) {
           return true;
         }
       }

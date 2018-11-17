@@ -32,7 +32,8 @@ public class Deadwood {
           System.out.println("Error = " + e);
       }
 
-      System.out.print("Enter number of players: ");
+      System.out.println("Welcome to Deadwood!");
+      System.out.print("Please enter number of players: ");
       int numPlayers = in.nextInt();
 
       board = new Board(numPlayers, roomArr, sceneArr, upgrades);
