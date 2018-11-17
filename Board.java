@@ -95,7 +95,7 @@ public class Board {
           winner = players.get(i);
         }
       }
-      System.out.format("Player %s won with %d points\n", winner.getName(), maxScore);
+      System.out.format("\nPlayer %s won with %d points\n", winner.getName(), maxScore);
       System.out.println("Gameover, thank you for playing Deadwood!");
       in.close();
       return;
