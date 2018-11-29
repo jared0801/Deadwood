@@ -1,5 +1,4 @@
 import org.w3c.dom.Document;
-import java.util.Scanner;
 import java.util.*;
 
 public class Deadwood {
@@ -16,7 +15,7 @@ public class Deadwood {
       Room[] roomArr = null;
       int[][] upgrades = null;
       Board board;
-      Scanner in = new Scanner(System.in);
+      InputManager inputManager;
 
       Document sceneDoc;
       Document boardDoc;
@@ -33,8 +32,9 @@ public class Deadwood {
       }
 
       System.out.println("Welcome to Deadwood!\nType \'help\' for a list of commands.");
+      inputManager = InputManager.getInstance();
 
-      board = new Board(numPlayers, roomArr, sceneArr, upgrades);
+      board = new Board(numPlayers, roomArr, sceneArr, upgrades, inputManager);
 
       System.out.println();
 

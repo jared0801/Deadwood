@@ -73,7 +73,10 @@ public class Player {
     }
 
     public int act() {
-      return rollDice(1) + chips;
+      int rollAmount = rollDice(1);
+      int total = rollAmount + chips;
+      System.out.format("Player rolled %d (%d + %d chips)\n", total, rollAmount, chips);
+      return total;
     }
 
     public void rehearse() {
