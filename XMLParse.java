@@ -63,7 +63,8 @@ public class XMLParse {
                     String name = sub.getAttributes().getNamedItem("name").getNodeValue();
                     int rank = Integer.parseInt(sub.getAttributes().getNamedItem("level").getNodeValue());
                     String line = "";
-                    // area variables
+						  int[] xy = null;
+						  int[] hw = null;
 
                     NodeList subChildren = sub.getChildNodes();
 
@@ -71,14 +72,15 @@ public class XMLParse {
                         Node subChild = subChildren.item(m);
 
                         if("area".equals(subChild.getNodeName())) {
-                            // area variables
+									 xy = new int[]{Integer.parseInt(subChild.getAttributes().getNamedItem("x").getNodeValue()), Integer.parseInt(subChild.getAttributes().getNamedItem("y").getNodeValue())};
+									 hw = new int[]{Integer.parseInt(subChild.getAttributes().getNamedItem("h").getNodeValue()), Integer.parseInt(subChild.getAttributes().getNamedItem("w").getNodeValue())};
                         }
                         else if("line".equals(subChild.getNodeName())) {
                             line = subChild.getTextContent();
                         }
                     }
 
-                    sceneRoles.add(new Role(name, rank, line, true));
+                    sceneRoles.add(new Role(name, rank, line, true, xy, hw));
                 }
             }
 
@@ -188,7 +190,8 @@ public class XMLParse {
                                 String partName = part.getAttributes().getNamedItem("name").getNodeValue();
                                 //System.out.println("Part name: " + partName);
                                 int partLvl = Integer.parseInt(part.getAttributes().getNamedItem("level").getNodeValue());
-                                String partX, partY, partH, partW;
+										  int[] xy = null;
+										  int[] hw = null;
                                 String partLine = "";
                                 NodeList subparts = part.getChildNodes();
                                 for(int l = 0; l < subparts.getLength(); l++)
@@ -196,10 +199,14 @@ public class XMLParse {
                                     Node partinfo = subparts.item(l);
                                     if("area".equals(partinfo.getNodeName()))
                                     {
+													 xy = new int[]{Integer.parseInt(partinfo.getAttributes().getNamedItem("x").getNodeValue()), Integer.parseInt(partinfo.getAttributes().getNamedItem("y").getNodeValue())};
+													 hw = new int[]{Integer.parseInt(partinfo.getAttributes().getNamedItem("h").getNodeValue()), Integer.parseInt(partinfo.getAttributes().getNamedItem("w").getNodeValue())};
+													 /*
                                         partX = partinfo.getAttributes().getNamedItem("x").getNodeValue();
                                         partY = partinfo.getAttributes().getNamedItem("y").getNodeValue();
                                         partH = partinfo.getAttributes().getNamedItem("h").getNodeValue();
                                         partW = partinfo.getAttributes().getNamedItem("w").getNodeValue();
+													 */
                                         //System.out.println("Part area: " + partX + " " + partY + " " + partH + " " + partW);
                                     }
 
@@ -210,7 +217,7 @@ public class XMLParse {
                                     }
                                 }
 
-                                boardRoles.add(new Role(partName, partLvl, partLine, false));
+                                boardRoles.add(new Role(partName, partLvl, partLine, false, xy, hw));
                             }
                         }
                     }
@@ -334,7 +341,7 @@ public class XMLParse {
         int officeUpgrades[][] = new int[2][5];
 
 
-        
+
         NodeList offices = root.getElementsByTagName("office");
         for (int i=0; i < offices.getLength();i++){
 

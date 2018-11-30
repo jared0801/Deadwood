@@ -4,13 +4,17 @@ public class Role {
     private int reqRank;
     private boolean taken;
     private boolean onScene;
+	 private int[] xy;
+	 private int[] hw;
 
-    public Role(String newName, int rank, String newLine, boolean cardStatus) {
+    public Role(String newName, int rank, String newLine, boolean cardStatus, int[] xyVal, int[] hwVal) {
       name = newName;
       reqRank = rank;
       taken = false;
       onScene = cardStatus;
       line = newLine;
+		xy = xyVal;
+		hw = hwVal;
     }
 
     public String toString() {
@@ -38,6 +42,14 @@ public class Role {
     public boolean isOnScene() {
       return onScene;
     }
+
+	 public int[] getXy() {
+		 return xy;
+	 }
+
+	 public int[] getHw() {
+		 return hw;
+	 }
 
     public void take() {
       taken = true;
