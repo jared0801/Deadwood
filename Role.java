@@ -4,8 +4,8 @@ public class Role {
     private int reqRank;
     private boolean taken;
     private boolean onScene;
-	 private int[] xy;
-	 private int[] hw;
+	  private int[] xy;
+	  private int[] hw;
 
     public Role(String newName, int rank, String newLine, boolean cardStatus, int[] xyVal, int[] hwVal) {
       name = newName;
@@ -13,8 +13,8 @@ public class Role {
       taken = false;
       onScene = cardStatus;
       line = newLine;
-		xy = xyVal;
-		hw = hwVal;
+		  xy = xyVal;
+		  hw = hwVal;
     }
 
     public String toString() {

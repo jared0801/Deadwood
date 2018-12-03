@@ -7,23 +7,52 @@ public class Room {
     private Scene currentScene;
     private List<String> neighbors;
     private List<Role> offCardRoles;
+    private int[] xy;
+    private int[] hw;
+    private int[][] takeXy;
+    private int[][] takeHw;
 
-    public Room(String newName, int shots, List<String> neighborNames, List<Role> roles) {
+    public Room(String newName, int shots, List<String> neighborNames, List<Role> roles, int[] xyVal, int[] hwVal, int[][] takeXyVal, int[][] takeHwVal) {
       name = newName;
       shotCounter = shots;
       neighbors = neighborNames;
       offCardRoles = roles;
+      xy = xyVal;
+      hw = hwVal;
+      takeXy = takeXyVal;
+      takeHw = takeHwVal;
     }
 
-    public Room(String newName, List<String> neighborNames) {
+    public Room(String newName, List<String> neighborNames, int[] xyVal, int[] hwVal) {
       name = newName;
+      currentShots = 0;
       shotCounter = 0;
       neighbors = neighborNames;
       offCardRoles = null;
+      xy = xyVal;
+      hw = hwVal;
+      takeXy = null;
+      takeHw = null;
     }
 
     public String getName() {
       return name;
+    }
+
+    public int[] getXy() {
+      return xy;
+    }
+
+    public int[] getHw() {
+      return hw;
+    }
+
+    public int[][] getTakeXy() {
+      return takeXy;
+    }
+
+    public int[][] getTakeHw() {
+      return takeHw;
     }
 
     public void setScene(Scene newScene) {

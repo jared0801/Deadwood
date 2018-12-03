@@ -63,8 +63,8 @@ public class XMLParse {
                     String name = sub.getAttributes().getNamedItem("name").getNodeValue();
                     int rank = Integer.parseInt(sub.getAttributes().getNamedItem("level").getNodeValue());
                     String line = "";
-						  int[] xy = null;
-						  int[] hw = null;
+						        int[] xy = null;
+						        int[] hw = null;
 
                     NodeList subChildren = sub.getChildNodes();
 
@@ -72,8 +72,8 @@ public class XMLParse {
                         Node subChild = subChildren.item(m);
 
                         if("area".equals(subChild.getNodeName())) {
-									 xy = new int[]{Integer.parseInt(subChild.getAttributes().getNamedItem("x").getNodeValue()), Integer.parseInt(subChild.getAttributes().getNamedItem("y").getNodeValue())};
-									 hw = new int[]{Integer.parseInt(subChild.getAttributes().getNamedItem("h").getNodeValue()), Integer.parseInt(subChild.getAttributes().getNamedItem("w").getNodeValue())};
+									          xy = new int[]{Integer.parseInt(subChild.getAttributes().getNamedItem("x").getNodeValue()), Integer.parseInt(subChild.getAttributes().getNamedItem("y").getNodeValue())};
+									          hw = new int[]{Integer.parseInt(subChild.getAttributes().getNamedItem("h").getNodeValue()), Integer.parseInt(subChild.getAttributes().getNamedItem("w").getNodeValue())};
                         }
                         else if("line".equals(subChild.getNodeName())) {
                             line = subChild.getTextContent();
@@ -99,8 +99,6 @@ public class XMLParse {
 
         Room[] newRooms = new Room[roomNum + 2]; // Add space for trailer and office
         int officeUpgrades[][] = new int[2][5];
-
-        //System.out.println("Sets: " + roomNum); //10
         int setCount = 0;
         for (int i=0; i < roomNum;i++){
 
@@ -111,6 +109,10 @@ public class XMLParse {
             List<Role> boardRoles = new ArrayList<Role>();
             Node setNode = sets.item(i);
             List<String> neighborNames = new ArrayList<String>();
+            int[] xy = null;
+            int[] hw = null;
+            int[][] takeXy = null;
+            int[][] takeHw = null;
             if("set".equals(setNode.getNodeName()))
             {
                 setName = setNode.getAttributes().getNamedItem("name").getNodeValue();
@@ -136,46 +138,42 @@ public class XMLParse {
                     }
 
                     else if("area".equals(sub.getNodeName())){
-                        String x, y, h, w;
-
-                        x = sub.getAttributes().getNamedItem("x").getNodeValue();
-                        y = sub.getAttributes().getNamedItem("y").getNodeValue();
-                        h = sub.getAttributes().getNamedItem("h").getNodeValue();
-                        w = sub.getAttributes().getNamedItem("w").getNodeValue();
-                        //System.out.println(x + " " + y + " " + h + " " + w);
+                        xy = new int[]{Integer.parseInt(sub.getAttributes().getNamedItem("x").getNodeValue()), Integer.parseInt(sub.getAttributes().getNamedItem("y").getNodeValue())};
+                        hw = new int[]{Integer.parseInt(sub.getAttributes().getNamedItem("h").getNodeValue()), Integer.parseInt(sub.getAttributes().getNamedItem("w").getNodeValue())};
                     }
 
                     else if("takes".equals(sub.getNodeName())){
 
                         NodeList takes = sub.getChildNodes();
-                        int maxTake = 0;
+                        for(int a = 0; a < takes.getLength(); a++) {
+                            if("take".equals(takes.item(a).getNodeName())) {
+                                shots++;
+                            }
+                        }
+                        takeXy = new int[2][shots];
+                        takeHw = new int[2][shots];
+                        int takeIndex = 0;
+
+                        System.out.format("Getting takes for %s (%d total)\n", setName, shots);
                         for (int k = 0; k < takes.getLength(); k++)
                         {
                             Node take = takes.item(k);
+
                             if("take".equals(take.getNodeName()))
                             {
-                                String takeNumber = take.getAttributes().getNamedItem("number").getNodeValue();
-                                int takeNumInt = Integer.parseInt(takeNumber);
-                                String takeX, takeY, takeH, takeW;
-                                if(takeNumInt > maxTake)
-                                {
-                                    maxTake = takeNumInt;
-                                }
-
                                 Node takeArea = take.getFirstChild();
-                                if("take".equals(take.getNodeName()))
+                                if("area".equals(takeArea.getNodeName()))
                                 {
-                                    takeX = takeArea.getAttributes().getNamedItem("x").getNodeValue();
-                                    takeY = takeArea.getAttributes().getNamedItem("y").getNodeValue();
-                                    takeH = takeArea.getAttributes().getNamedItem("h").getNodeValue();
-                                    takeW = takeArea.getAttributes().getNamedItem("w").getNodeValue();
-                                }else{
-                                    takeX = takeY = takeH = takeW = "";
+                                    takeXy[0][takeIndex] = Integer.parseInt(takeArea.getAttributes().getNamedItem("x").getNodeValue());
+                                    takeXy[1][takeIndex] = Integer.parseInt(takeArea.getAttributes().getNamedItem("y").getNodeValue());
+                                    takeHw[0][takeIndex] = Integer.parseInt(takeArea.getAttributes().getNamedItem("h").getNodeValue());
+                                    takeHw[1][takeIndex] = Integer.parseInt(takeArea.getAttributes().getNamedItem("w").getNodeValue());
+                                } else {
+                                    takeXy[0][takeIndex] = takeXy[1][takeIndex] = takeHw[0][takeIndex] = takeHw[1][takeIndex] = 0;
                                 }
-                                //System.out.println("Takes area: " + takeX + " " + takeY + " " + takeH + " " + takeW);
+                                takeIndex++;
                             }
                         }
-                        shots = maxTake;
 
                     }
 
@@ -188,10 +186,9 @@ public class XMLParse {
                             if("part".equals(part.getNodeName()))
                             {
                                 String partName = part.getAttributes().getNamedItem("name").getNodeValue();
-                                //System.out.println("Part name: " + partName);
                                 int partLvl = Integer.parseInt(part.getAttributes().getNamedItem("level").getNodeValue());
-										  int[] xy = null;
-										  int[] hw = null;
+										            int[] partXy = null;
+										            int[] partHw = null;
                                 String partLine = "";
                                 NodeList subparts = part.getChildNodes();
                                 for(int l = 0; l < subparts.getLength(); l++)
@@ -199,33 +196,23 @@ public class XMLParse {
                                     Node partinfo = subparts.item(l);
                                     if("area".equals(partinfo.getNodeName()))
                                     {
-													 xy = new int[]{Integer.parseInt(partinfo.getAttributes().getNamedItem("x").getNodeValue()), Integer.parseInt(partinfo.getAttributes().getNamedItem("y").getNodeValue())};
-													 hw = new int[]{Integer.parseInt(partinfo.getAttributes().getNamedItem("h").getNodeValue()), Integer.parseInt(partinfo.getAttributes().getNamedItem("w").getNodeValue())};
-													 /*
-                                        partX = partinfo.getAttributes().getNamedItem("x").getNodeValue();
-                                        partY = partinfo.getAttributes().getNamedItem("y").getNodeValue();
-                                        partH = partinfo.getAttributes().getNamedItem("h").getNodeValue();
-                                        partW = partinfo.getAttributes().getNamedItem("w").getNodeValue();
-													 */
-                                        //System.out.println("Part area: " + partX + " " + partY + " " + partH + " " + partW);
+													              partXy = new int[]{Integer.parseInt(partinfo.getAttributes().getNamedItem("x").getNodeValue()), Integer.parseInt(partinfo.getAttributes().getNamedItem("y").getNodeValue())};
+													              partHw = new int[]{Integer.parseInt(partinfo.getAttributes().getNamedItem("h").getNodeValue()), Integer.parseInt(partinfo.getAttributes().getNamedItem("w").getNodeValue())};
                                     }
 
                                     if("line".equals(partinfo.getNodeName()))
                                     {
                                         partLine = partinfo.getTextContent();
-                                        //System.out.println("Part line: " + partLine);
                                     }
                                 }
 
-                                boardRoles.add(new Role(partName, partLvl, partLine, false, xy, hw));
+                                boardRoles.add(new Role(partName, partLvl, partLine, false, partXy, partHw));
                             }
                         }
                     }
                 }
-
-                //System.out.println("\n");
             }
-            newRooms[i] = new Room(setName, shots, neighborNames, boardRoles);
+            newRooms[i] = new Room(setName, shots, neighborNames, boardRoles, xy, hw, takeXy, takeHw);
         }
 
         NodeList trailers = root.getElementsByTagName("trailer");
@@ -235,12 +222,11 @@ public class XMLParse {
             Node trailer = trailers.item(i);
             String setName = "trailer";
             ArrayList<String> neighborNames = new ArrayList<>();
+            int[] xy = null;
+            int[] hw = null;
             if("trailer".equals(trailer.getNodeName()))
             {
-                //System.out.println("Room: Trailer");
-
                 //reads data
-
                 NodeList children = trailer.getChildNodes();
                 int count = 0;
                 for (int j=0; j< children.getLength(); j++){
@@ -264,17 +250,11 @@ public class XMLParse {
 
                     }
                     else if("area".equals(sub.getNodeName())){
-                        String x, y, h, w;
-                        x = sub.getAttributes().getNamedItem("x").getNodeValue();
-                        y = sub.getAttributes().getNamedItem("y").getNodeValue();
-                        h = sub.getAttributes().getNamedItem("h").getNodeValue();
-                        w = sub.getAttributes().getNamedItem("w").getNodeValue();
-                        //System.out.println(x + " " + y + " " + h + " " + w);
+                      xy = new int[]{Integer.parseInt(sub.getAttributes().getNamedItem("x").getNodeValue()), Integer.parseInt(sub.getAttributes().getNamedItem("y").getNodeValue())};
+                      hw = new int[]{Integer.parseInt(sub.getAttributes().getNamedItem("h").getNodeValue()), Integer.parseInt(sub.getAttributes().getNamedItem("w").getNodeValue())};
                     }
                 }
-
-                newRooms[setCount++] = new Room(setName, neighborNames);
-                //System.out.println("\n");
+                newRooms[setCount++] = new Room(setName, neighborNames, xy, hw);
             }
         }
 
@@ -285,12 +265,11 @@ public class XMLParse {
             Node office = offices.item(i);
             String setName = "office";
             ArrayList<String> neighborNames = new ArrayList<>();
+            int[] xy = null;
+            int[] hw = null;
             if("office".equals(office.getNodeName()))
             {
-                //System.out.println("Room: Office");
-
                 //reads data
-
                 NodeList children = office.getChildNodes();
                 int count = 0;
                 for (int j=0; j< children.getLength(); j++){
@@ -308,21 +287,16 @@ public class XMLParse {
                             {
                                 String neighborName = neighbor.getAttributes().getNamedItem("name").getNodeValue();
                                 neighborNames.add(neighborName);
-                                //System.out.println(neighborName);
                             }
                         }
 
                     }
                     else if("area".equals(sub.getNodeName())){
-                        String x, y, h, w;
-                        x = sub.getAttributes().getNamedItem("x").getNodeValue();
-                        y = sub.getAttributes().getNamedItem("y").getNodeValue();
-                        h = sub.getAttributes().getNamedItem("h").getNodeValue();
-                        w = sub.getAttributes().getNamedItem("w").getNodeValue();
-                        //System.out.println(x + " " + y + " " + h + " " + w);
+                        xy = new int[]{Integer.parseInt(sub.getAttributes().getNamedItem("x").getNodeValue()), Integer.parseInt(sub.getAttributes().getNamedItem("y").getNodeValue())};
+                        hw = new int[]{Integer.parseInt(sub.getAttributes().getNamedItem("h").getNodeValue()), Integer.parseInt(sub.getAttributes().getNamedItem("w").getNodeValue())};
                     }
                 }
-                newRooms[setCount++] = new Room(setName, neighborNames);
+                newRooms[setCount++] = new Room(setName, neighborNames, xy, hw);
             }
         }
         return newRooms;
