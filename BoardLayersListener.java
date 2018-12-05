@@ -55,9 +55,10 @@ public class BoardLayersListener extends JFrame {
         for(int i = 0; i < 10; i++) {
             roomLabels[i] = new JLabel();
             roomLabels[i].setBounds(roomArr[i].getXy()[0], roomArr[i].getXy()[1], roomArr[i].getHw()[1], roomArr[i].getHw()[0]);
-            roomLabels[i].setBackground(Color.white);
+            //roomLabels[i].setBackground(Color.white);
             roomLabels[i].addMouseListener(new boardMouseListener());
             roomLabels[i].setVisible(true);
+            roomLabels[i].setOpaque(true);
             bPane.add(roomLabels[i], new Integer(2));
         }
 
@@ -140,25 +141,41 @@ public class BoardLayersListener extends JFrame {
             else if (e.getSource()== bMove){
                 System.out.println("Move is Selected\n");
             }
-            else if (e.getSource()== roomLabels[0]){
-                List<String> neighbors = roomArr[0].getNeighbors();
-                for(int i = 0; i < neighbors.size(); i++) {
-                    System.out.println(neighbors.get(i));
-                }
-            }
         }
         public void mousePressed(MouseEvent e) {
+
         }
         public void mouseReleased(MouseEvent e) {
         }
         public void mouseEntered(MouseEvent e) {
-            if(e.getSource() == roomLabels[0]) {
-                //roomLabel.setborder()
-                System.out.println("mouse loc: " + e.getLocationOnScreen());
-                System.out.println("Mouse entered woohoo!!");
+            for(int i = 0; i < 10; i++) {
+                if (e.getSource()== roomLabels[i]){
+                    List<String> neighbors = roomArr[i].getNeighbors();
+                    for(int j = 0; j < neighbors.size(); j++) {
+                        int ind = gameBoard.getRoomIndexByName(neighbors.get(j));
+                        if(ind >= 0 && ind < 10){
+                            if(roomLabels[ind].isVisible()) {
+                                roomLabels[ind].setVisible(false);
+                            }
+                        }
+                    }
+                }
             }
         }
         public void mouseExited(MouseEvent e) {
+            for(int i = 0; i < 10; i++) {
+                if (e.getSource()== roomLabels[i]){
+                    List<String> neighbors = roomArr[i].getNeighbors();
+                    for(int j = 0; j < neighbors.size(); j++) {
+                        int ind = gameBoard.getRoomIndexByName(neighbors.get(j));
+                        if(ind >= 0 && ind < 10){
+                            if(!roomLabels[ind].isVisible()) {
+                                roomLabels[ind].setVisible(true);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

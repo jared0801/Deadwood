@@ -192,12 +192,27 @@ public class Board {
        returns: Room if found, null otherwise
     */
     public Room getRoomByName(String name) {
-      for(int i = 0; i < rooms.length; i++) {
-        if(rooms[i].getName().equals(name)) {
-          return rooms[i];
+        for(int i = 0; i < rooms.length; i++) {
+            if(rooms[i].getName().equals(name)) {
+                return rooms[i];
+            }
         }
-      }
-      return null;
+        return null;
+    }
+
+    /* function getRoomIndexByName
+       purpose: finds the index of a Room, given its name
+       parameters: name, string name of the target room
+       returns: Index of the room if found, null otherwise
+    */
+    public int getRoomIndexByName(String name) {
+        int i;
+        for(i = 0; i < rooms.length; i++) {
+            if(rooms[i].getName().equals(name)) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     /* function checkDayCont
