@@ -10,9 +10,7 @@
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.ImageIcon;
-import javax.imageio.ImageIO;
 import java.awt.event.*;
-import javax.swing.JOptionPane;
 import java.util.List;
 
 public class BoardLayersListener extends JFrame {
@@ -20,7 +18,7 @@ public class BoardLayersListener extends JFrame {
     // JLabels
     JLabel boardlabel;
     JLabel cardlabel;
-    JLabel playerlabel;
+    JLabel playerLabels[];
     JLabel mLabel;
     JLabel roomLabels[];
 
@@ -36,8 +34,13 @@ public class BoardLayersListener extends JFrame {
     Board gameBoard;
     Room[] roomArr;
 
+    String playerImages[] = {"media/dice/b1.png", "media/dice/c1.png", "media/dice/g1.png", "media/dice/o1.png", "media/dice/p1.png", "media/dice/r1.png"};
+
+    boolean playerMoving = false;
+    int numPlayers = 0;
+
     // Constructor
-    public BoardLayersListener(Board board) {
+    public BoardLayersListener(int players, Board board) {
 
         // Set the title of the JFrame
         super("Deadwood");
@@ -49,22 +52,41 @@ public class BoardLayersListener extends JFrame {
         //roomArr = rooms;
         gameBoard = board;
         roomArr = gameBoard.getRooms();
+        playerLabels = new JLabel[6];
+        numPlayers = players;
 
         // Create labels for each room
-        roomLabels = new JLabel[10];
+        roomLabels = new JLabel[12];
         for(int i = 0; i < 10; i++) {
             roomLabels[i] = new JLabel();
             roomLabels[i].setBounds(roomArr[i].getXy()[0], roomArr[i].getXy()[1], roomArr[i].getHw()[1], roomArr[i].getHw()[0]);
             //roomLabels[i].setBackground(Color.white);
             roomLabels[i].addMouseListener(new boardMouseListener());
             roomLabels[i].setVisible(true);
-            roomLabels[i].setOpaque(true);
+            roomLabels[i].setOpaque(false);
             bPane.add(roomLabels[i], new Integer(2));
         }
 
+        // Add trailer and office room labels
+        Room trailerRoom = gameBoard.getRoomByName("trailer");
+        JLabel trailerLabel = new JLabel();
+        trailerLabel.setBounds(trailerRoom.getXy()[0], trailerRoom.getXy()[1], trailerRoom.getHw()[1], trailerRoom.getHw()[0]);
+        trailerLabel.addMouseListener(new boardMouseListener());
+        trailerLabel.setVisible(true);
+
+        bPane.add(trailerLabel, new Integer(2));
+
+        Room officeRoom = gameBoard.getRoomByName("office");
+        JLabel officeLabel = new JLabel();
+        officeLabel.setBounds(officeRoom.getXy()[0], officeRoom.getXy()[1], officeRoom.getHw()[1], officeRoom.getHw()[0]);
+        officeLabel.addMouseListener(new boardMouseListener());
+        officeLabel.setVisible(true);
+
+        bPane.add(officeLabel, new Integer(2));
+
         // Create the deadwood board
         boardlabel = new JLabel();
-        ImageIcon icon =  new ImageIcon("board.jpg");
+        ImageIcon icon =  new ImageIcon("media/board.jpg");
         boardlabel.setIcon(icon);
         boardlabel.setBounds(0,0,icon.getIconWidth(),icon.getIconHeight());
 
@@ -76,7 +98,7 @@ public class BoardLayersListener extends JFrame {
 
         // Add a scene card to this room
         cardlabel = new JLabel();
-        ImageIcon cIcon =  new ImageIcon("01.png");
+        ImageIcon cIcon =  new ImageIcon("media/cards/01.png");
         cardlabel.setIcon(cIcon);
         cardlabel.setBounds(20,65,cIcon.getIconWidth()+2,cIcon.getIconHeight());
         cardlabel.setOpaque(true);
@@ -85,17 +107,15 @@ public class BoardLayersListener extends JFrame {
         bPane.add(cardlabel, new Integer(1));
 
 
-
-
         // Add a dice to represent a player.
-        // Role for Crusty the prospector. The x and y co-ordiantes are taken from Board.xml file
-        playerlabel = new JLabel();
-        ImageIcon pIcon = new ImageIcon("r2.png");
-        playerlabel.setIcon(pIcon);
-        //playerlabel.setBounds(114,227,pIcon.getIconWidth(),pIcon.getIconHeight());
-        playerlabel.setBounds(114,227,46,46);
-        playerlabel.setVisible(false);
-        bPane.add(playerlabel,new Integer(3));
+        for (int i = 0; i < numPlayers; i++) {
+            playerLabels[i] = new JLabel();
+            playerLabels[i].setIcon(new ImageIcon(playerImages[i]));
+
+            playerLabels[i].setBounds(trailerRoom.getXy()[0] + 50*i, trailerRoom.getXy()[1],46,46);
+            playerLabels[i].setVisible(true);
+            bPane.add(playerLabels[i],new Integer(3));
+        }
 
         // Create the Menu for action buttons
         mLabel = new JLabel("MENU");
@@ -130,16 +150,48 @@ public class BoardLayersListener extends JFrame {
 
         // Code for the different button clicks
         public void mouseClicked(MouseEvent e) {
-            System.out.println(e.getLocationOnScreen());
+            //System.out.println(e.getLocationOnScreen());
             if (e.getSource()== bAct){
-                playerlabel.setVisible(true);
                 System.out.println("Acting is Selected\n");
             }
             else if (e.getSource()== bRehearse){
                 System.out.println("Rehearse is Selected\n");
             }
             else if (e.getSource()== bMove){
-                System.out.println("Move is Selected\n");
+                if(gameBoard.isActiveGame()) {
+                    playerMoving = true;
+                }
+            }
+
+            if(playerMoving == true) {
+                List<String> neighbors = gameBoard.getCurrentPlayer().getRoom().getNeighbors();
+                for(int i = 0; i < neighbors.size(); i++) {
+                    int ind = gameBoard.getRoomIndexByName(neighbors.get(i));
+                    if(ind >= 0 && ind < 10){
+                        if(!roomLabels[ind].isVisible()) {
+                            roomLabels[ind].setVisible(true);
+                        }
+                    }
+
+                    if(e.getSource() == roomLabels[ind]) {
+                        // Move player to selected room
+                        System.out.println(roomArr[ind].getName());
+                        gameBoard.getCurrentPlayer().moveTo(gameBoard.getRoomByName(roomArr[ind].getName()));
+                        Rectangle loc = new Rectangle(
+                                gameBoard.getRoomByName(roomArr[ind].getName()).getXy()[0],
+                                gameBoard.getRoomByName(roomArr[ind].getName()).getXy()[1],
+                                46,46);
+                        
+                        playerLabels[gameBoard.getCurrentPlayerIndex()].setBounds(loc);
+                        playerMoving = false;
+                        // Change turns
+                        int nextPlayer = gameBoard.getCurrentPlayerIndex() + 1;
+                        if(nextPlayer >= numPlayers) {
+                            nextPlayer = nextPlayer % numPlayers;
+                        }
+                        gameBoard.setCurrentPlayer(gameBoard.getPlayers().get(nextPlayer));
+                    }
+                }
             }
         }
         public void mousePressed(MouseEvent e) {
@@ -148,7 +200,7 @@ public class BoardLayersListener extends JFrame {
         public void mouseReleased(MouseEvent e) {
         }
         public void mouseEntered(MouseEvent e) {
-            for(int i = 0; i < 10; i++) {
+            /*for(int i = 0; i < 10; i++) {
                 if (e.getSource()== roomLabels[i]){
                     List<String> neighbors = roomArr[i].getNeighbors();
                     for(int j = 0; j < neighbors.size(); j++) {
@@ -160,10 +212,10 @@ public class BoardLayersListener extends JFrame {
                         }
                     }
                 }
-            }
+            }*/
         }
         public void mouseExited(MouseEvent e) {
-            for(int i = 0; i < 10; i++) {
+            /*for(int i = 0; i < 10; i++) {
                 if (e.getSource()== roomLabels[i]){
                     List<String> neighbors = roomArr[i].getNeighbors();
                     for(int j = 0; j < neighbors.size(); j++) {
@@ -175,7 +227,7 @@ public class BoardLayersListener extends JFrame {
                         }
                     }
                 }
-            }
+            }*/
         }
     }
 

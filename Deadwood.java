@@ -43,7 +43,7 @@ public class Deadwood {
       } while (numPlayers < 2 || numPlayers > 6);
 
       boardCtrl = new Board(numPlayers, roomArr, sceneArr, upgrades, inputManager);
-      boardView = new BoardLayersListener(boardCtrl);
+      boardView = new BoardLayersListener(numPlayers, boardCtrl);
 
       System.out.println();
 

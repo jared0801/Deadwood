@@ -9,6 +9,7 @@ public class Board {
     private List<Scene> scenes;
     private int[][] upgrades;
     private InputManager inputManager;
+    private boolean activeGame;
 
     public Board(int numPlayers, Room[] roomArr, List<Scene> sceneArr, int[][] upgradeCosts, InputManager newInputManager) {
       totalPlayers = numPlayers;
@@ -19,6 +20,7 @@ public class Board {
       scenes = sceneArr;
       upgrades = upgradeCosts;
       inputManager = newInputManager;
+      activeGame = false;
     }
 
     /* function runGame
@@ -98,7 +100,7 @@ public class Board {
       for(int i = 0; i < totalPlayers; i++) {
         players.add(new Player(playerNames[i]));
       }
-
+      activeGame = true;
       newDay();
       activePlayerIndex = 0;
       return;
@@ -120,6 +122,7 @@ public class Board {
       }
       System.out.format("\n%s won with %d points\n", winner.getName(), maxScore);
       System.out.println("Gameover, thank you for playing Deadwood!");
+      activeGame = false;
       return;
     }
 
@@ -137,12 +140,20 @@ public class Board {
     }
 
     public Room[] getRooms() {
-      return rooms;
-    }
+    return rooms;
+  }
+
+    public boolean isActiveGame() { return activeGame; }
 
     public Player getCurrentPlayer() {
-      return players.get(activePlayerIndex);
+    return players.get(activePlayerIndex);
+  }
+
+    public void setCurrentPlayer(Player p) {
+      activePlayerIndex = players.indexOf(p);
     }
+
+    public int getCurrentPlayerIndex() { return activePlayerIndex; }
 
     /* function movePlayer
        purpose: attempts to move a Player to a given room
