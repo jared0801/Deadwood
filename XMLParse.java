@@ -154,7 +154,7 @@ public class XMLParse {
                         takeHw = new int[2][shots];
                         int takeIndex = 0;
 
-                        System.out.format("Getting takes for %s (%d total)\n", setName, shots);
+                        //System.out.format("Getting takes for %s (%d total)\n", setName, shots);
                         for (int k = 0; k < takes.getLength(); k++)
                         {
                             Node take = takes.item(k);

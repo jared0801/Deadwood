@@ -181,7 +181,7 @@ public class BoardLayersListener extends JFrame {
                                 gameBoard.getRoomByName(roomArr[ind].getName()).getXy()[0],
                                 gameBoard.getRoomByName(roomArr[ind].getName()).getXy()[1],
                                 46,46);
-                        
+
                         playerLabels[gameBoard.getCurrentPlayerIndex()].setBounds(loc);
                         playerMoving = false;
                         // Change turns
