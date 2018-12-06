@@ -79,7 +79,7 @@ public class BoardViewManager {
 
   private void initLabels() {
     // Create labels for each room
-    roomLabels = new JLabel[10];
+    roomLabels = new JLabel[12];
     for(int i = 0; i < 10; i++) {
         roomLabels[i] = new JLabel();
         roomLabels[i].setBounds(roomArr[i].getXy()[0], roomArr[i].getXy()[1], roomArr[i].getHw()[1], roomArr[i].getHw()[0]);
@@ -96,6 +96,7 @@ public class BoardViewManager {
     trailerLabel.setBounds(trailerRoom.getXy()[0], trailerRoom.getXy()[1], trailerRoom.getHw()[1], trailerRoom.getHw()[0]);
     trailerLabel.addMouseListener(new boardMouseListener());
     trailerLabel.setVisible(true);
+    roomLabels[10] = trailerLabel;
 
     bPane.add(trailerLabel, new Integer(2));
 
@@ -104,6 +105,7 @@ public class BoardViewManager {
     officeLabel.setBounds(officeRoom.getXy()[0], officeRoom.getXy()[1], officeRoom.getHw()[1], officeRoom.getHw()[0]);
     officeLabel.addMouseListener(new boardMouseListener());
     officeLabel.setVisible(true);
+    roomLabels[11] = officeLabel;
 
     bPane.add(officeLabel, new Integer(2));
 
@@ -239,8 +241,10 @@ public class BoardViewManager {
   }
 
   class boardMouseListener implements MouseListener {
+    List<String> neighbors;
 
     public void mouseClicked(MouseEvent e) {
+      neighbors = gameBoard.getCurrentPlayer().getRoom().getNeighbors();
       if(gameBoard.isActiveGame()) {
         currPlayer = gameBoard.getCurrentPlayer();
         currRoom = currPlayer.getRoom();
@@ -255,6 +259,15 @@ public class BoardViewManager {
           if(!playerMoved) {
             playerMoving = true;
             println("Select a room to move to");
+
+            // Highlight available rooms
+            for(int j = 0; j < neighbors.size(); j++) {
+              int ind = gameBoard.getRoomIndexByName(neighbors.get(j));
+              //if(ind >= 0 && ind < 10){
+                roomLabels[ind].setIcon(new ImageIcon("media/cards/OpenCard.png"));
+              //}
+            }
+
           }
           else {
             println("Player has already moved this turn");
@@ -284,6 +297,7 @@ public class BoardViewManager {
         else if(playerMoving) {
           List<String> neighbors = currRoom.getNeighbors();
           for(int i = 0; i < neighbors.size(); i++) {
+
             int roomIndex = gameBoard.getRoomIndexByName(neighbors.get(i));
             JLabel targetRoomLabel = null;
             String targetRoomName = "";
@@ -306,8 +320,12 @@ public class BoardViewManager {
               playerMoving = false;
 
               if(playerMoved) {
+                for(int j = 0; j < roomLabels.length; j++) {
+                  roomLabels[j].setIcon(null);
+                }
+                int xOffset = gameBoard.getPlayersInRoom(roomArr[roomIndex]).size() - 1;
                 Rectangle loc = new Rectangle(
-                  gameBoard.getRoomByName(targetRoomName).getXy()[0],
+                  gameBoard.getRoomByName(targetRoomName).getXy()[0] + xOffset * 50,
                   gameBoard.getRoomByName(targetRoomName).getXy()[1],
                   46, 46);
                 playerLabels[gameBoard.getCurrentPlayerIndex()].setBounds(loc);

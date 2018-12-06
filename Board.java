@@ -295,7 +295,7 @@ public class Board {
        parameters: target, the Room to check within
        returns: List of Players in the room
     */
-    private List<Player> getPlayersInRoom(Room target) {
+    public List<Player> getPlayersInRoom(Room target) {
       List<Player> ret = new ArrayList<Player>();
       String name = target.getName();
       for(int i = 0; i < players.size(); i++) {
