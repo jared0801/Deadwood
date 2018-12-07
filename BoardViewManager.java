@@ -245,6 +245,11 @@ public class BoardViewManager {
 
     public void mouseClicked(MouseEvent e) {
       neighbors = gameBoard.getCurrentPlayer().getRoom().getNeighbors();
+      if(playerMoving) {
+        for(int j = 0; j < roomLabels.length; j++) {
+          roomLabels[j].setIcon(null);
+        }
+      }
       if(gameBoard.isActiveGame()) {
         currPlayer = gameBoard.getCurrentPlayer();
         currRoom = currPlayer.getRoom();
@@ -316,13 +321,22 @@ public class BoardViewManager {
             }
 
             if(e.getSource() == targetRoomLabel) {
-              playerMoved = gameBoard.movePlayer(currPlayer, targetRoomName);
               playerMoving = false;
+              playerMoved = gameBoard.movePlayer(currPlayer, targetRoomName);
 
               if(playerMoved) {
-                for(int j = 0; j < roomLabels.length; j++) {
-                  roomLabels[j].setIcon(null);
+                //Readjust other players in curr room
+                List<Player> otherPlayers = gameBoard.getPlayersInRoom(currRoom);
+                for(int j = 0; j < otherPlayers.size(); j++)
+                {
+                  Rectangle loc = new Rectangle(
+                          currRoom.getXy()[0] + j * 50,
+                          currRoom.getXy()[1],
+                          46, 46);
+                  playerLabels[gameBoard.getPlayerIndexByName(otherPlayers.get(j).getName())].setBounds(loc);
                 }
+
+                //Adjust location for other players in the set
                 int xOffset = gameBoard.getPlayersInRoom(roomArr[roomIndex]).size() - 1;
                 Rectangle loc = new Rectangle(
                   gameBoard.getRoomByName(targetRoomName).getXy()[0] + xOffset * 50,

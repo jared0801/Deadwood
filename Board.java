@@ -170,6 +170,15 @@ public class Board {
 
     public int getCurrentPlayerIndex() { return activePlayerIndex; }
 
+    public int getPlayerIndexByName(String name) {
+      for(int i = 0; i < players.size(); i++) {
+        if(players.get(i).getName() == name) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
     /* function movePlayer
        purpose: attempts to move a Player to a given room
        parameters: currPlayer, Player object to move
