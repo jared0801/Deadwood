@@ -18,7 +18,7 @@ public class BoardViewManager {
   JLabel boardlabel;
   JLabel playerLabels[];
   JLabel mLabel;
-  JLabel roomLabels[];
+  JLabel roomLabels[][];
   JLabel trailerLabel;
   JLabel officeLabel;
   JLabel cardLabels[];
@@ -197,8 +197,28 @@ public class BoardViewManager {
     }
   }
 
-  private void initRoomRoles() {
+  private initRoomRoles(Room currRoom) {
+	  List<Role> offCardRoles = currRoom.getOffCardRoles();
+	  JLabel offCardLabels[] = new JLabel[offCardRoles.size()];
 
+	  List<Role> sceneRoles = currRoom.getSceneRoles();
+	  JLabel sceneLabels[] = new JLabel[sceneRoles.size()];
+
+	  for(int i = 0; i < offCardRoles.size(); i++) {
+		  Role curr = offCardRoles.get(i);
+		  offCardLabels[i] = new JLabel();
+		  offCardLabels[i].setBounds(curr.getXy()[0], curr.getXy()[1], curr.getHw()[1], curr.getHw()[0]);
+		  offCardLabels[i].setOpaque(true);
+		  bPane.add(offCardLabels[i], new Integer(1));
+	  }
+
+	  for(int i = 0; i < sceneRoles.size(); i++) {
+		  Role curr = sceneRoles.get(i);
+		  sceneLabels[i] = new JLabel();
+		  sceneLabels[i].setBounds(curr.getXy()[0], curr.getXy()[1], curr.getHw()[1], curr.getHw()[0]);
+		  sceneLabels[i].setOpaque(true);
+		  bPane.add(sceneLabels[i], new Integer(1));
+	  }
   }
 
   private void initTextArea() {
