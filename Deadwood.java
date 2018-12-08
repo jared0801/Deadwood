@@ -46,6 +46,5 @@ public class Deadwood {
       //boardView.setVisible(true);
 
       boardCtrl.createGame();
-      boardCtrl.runGame();
     }
 }
