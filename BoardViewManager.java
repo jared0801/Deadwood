@@ -45,7 +45,6 @@ public class BoardViewManager {
   boolean playerMoved = false;
   boolean turnContinue = true;
   boolean takingRole = false;
-  boolean playerTurn = false;
 
   private BoardViewManager() {
 
@@ -73,7 +72,6 @@ public class BoardViewManager {
     initPlayers();
     initMenu();
     initTextArea();
-    //initRoomRoles();
     initCards();
 
     bFrame.setVisible(true);
@@ -112,7 +110,7 @@ public class BoardViewManager {
                   roomArr[i].getOffCardRoles().get(j).getHw()[1],
                   roomArr[i].getOffCardRoles().get(j).getHw()[0]);
           roleLabels[i][j].addMouseListener(new boardMouseListener());
-          roleLabels[i][j].setOpaque(true);
+          roleLabels[i][j].setOpaque(false);
           roleLabels[i][j].setVisible(true);
           bPane.add(roleLabels[i][j], new Integer(2));
         }
@@ -224,31 +222,6 @@ public class BoardViewManager {
       bPane.add(cardLabels[i], new Integer(1));
     }
   }
-/*
-  private void initRoomRoles(Room currRoom) {
-	  List<Role> offCardRoles = currRoom.getOffCardRoles();
-	  JLabel offCardLabels[] = new JLabel[offCardRoles.size()];
-
-	  List<Role> sceneRoles = currRoom.getSceneRoles();
-	  JLabel sceneLabels[] = new JLabel[sceneRoles.size()];
-
-	  for(int i = 0; i < offCardRoles.size(); i++) {
-		  Role curr = offCardRoles.get(i);
-		  offCardLabels[i] = new JLabel();
-		  offCardLabels[i].setBounds(curr.getXy()[0], curr.getXy()[1], curr.getHw()[1], curr.getHw()[0]);
-		  offCardLabels[i].setOpaque(true);
-		  bPane.add(offCardLabels[i], new Integer(1));
-	  }
-
-	  for(int i = 0; i < sceneRoles.size(); i++) {
-		  Role curr = sceneRoles.get(i);
-		  sceneLabels[i] = new JLabel();
-		  sceneLabels[i].setBounds(curr.getXy()[0], curr.getXy()[1], curr.getHw()[1], curr.getHw()[0]);
-		  sceneLabels[i].setOpaque(true);
-		  bPane.add(sceneLabels[i], new Integer(1));
-	  }
-  }
-*/
 
   private void initTextArea() {
     bTextArea = new JTextArea(5, 20);
@@ -300,6 +273,13 @@ public class BoardViewManager {
 
   private void movePlayerRoom(Room currRoom, String targetRoomName, int playerIndex) {
     int roomIndex = gameBoard.getRoomIndexByName(targetRoomName);
+    Room targetRoom = roomArr[roomIndex];
+    if(!targetRoom.getName().equals("office") && !targetRoom.getName().equals("trailer")) {
+      if(!targetRoom.getVisited() && targetRoom.getSceneActive()) {
+        targetRoom.visit();
+        cardLabels[roomIndex].setIcon(new ImageIcon("media/cards/" + targetRoom.getSceneImg()));
+      }
+    }
 
     // Read just other players in curr room
     List<Player> otherPlayers = gameBoard.getPlayersInRoom(currRoom);
@@ -361,10 +341,9 @@ public class BoardViewManager {
               int ind = gameBoard.getRoomIndexByName(neighbors.get(j));
               roomLabels[ind].setIcon(new ImageIcon("media/cards/OpenCard.png"));
             }
-
           }
           else {
-            println("Player has already moved this turn");
+            println("Player has already moved or has a role");
           }
         }
         else if(e.getSource() == bEnd) {
@@ -382,10 +361,44 @@ public class BoardViewManager {
           }
         }
         else if(e.getSource() == bTakeRole) {
-          takingRole = true;
-          println("Select a role to take");
+          if(!currPlayer.hasRole()) {
+            if(!currRoom.getName().equals("office") && !currRoom.getName().equals("trailer")) {
+              if(currRoom.getSceneActive()) {
+                takingRole = true;
+                println("Select a role to take");
+              }
+              else {
+                println("Scene is already wrapped");
+              }
+            }
+            else {
+              println("No roles are available in the Trailers or Casting Office");
+            }
+          }
+          else {
+            println("Player already has a role");
+          }
         }
         else if(takingRole) {
+          int roomIndex = gameBoard.getRoomIndexByName(currRoom.getName());
+          List<Role> roomRoles = currRoom.getOffCardRoles();
+          boolean tookRole = false;
+
+          for(int i = 0; i < roleLabels[roomIndex].length; i++) {
+            if(e.getSource() == roleLabels[roomIndex][i]) {
+              tookRole = gameBoard.playerTakeRole(currPlayer, roomRoles.get(i).getName());
+              if(tookRole) {
+                Rectangle loc = new Rectangle(
+                  roomRoles.get(i).getXy()[0],
+                  roomRoles.get(i).getXy()[1],
+                  46, 46);
+                playerLabels[gameBoard.getCurrentPlayerIndex()].setBounds(loc);
+
+                playerMoved = true;
+              }
+              break;
+            }
+          }
           takingRole = false;
         }
         else if(playerMoving) {
@@ -416,6 +429,7 @@ public class BoardViewManager {
               if(playerMoved) {
                 movePlayerRoom(currRoom, targetRoomName, gameBoard.getCurrentPlayerIndex());
               }
+              break;
             }
           }
         }

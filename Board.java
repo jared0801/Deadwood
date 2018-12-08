@@ -105,16 +105,13 @@ public class Board {
       Player winner = null;
       for(int i = 0; i < players.size(); i++) {
         int score = calcScore(players.get(i));
-        //System.out.format("%s has %d points\n", players.get(i).getName(), score);
         view.print(String.format("%s has %d points\n", players.get(i).getName(), score));
         if(maxScore < score) {
           maxScore = score;
           winner = players.get(i);
         }
       }
-      //System.out.format("\n%s won with %d points\n", winner.getName(), maxScore);
       view.print(String.format("\n%s won with %d points\n", winner.getName(), maxScore));
-      //System.out.println("Gameover, thank you for playing Deadwood!");
       view.println("Gameover, thank you for playing Deadwood!");
       activeGame = false;
       return;
@@ -348,26 +345,21 @@ public class Board {
       }
 
       if(!currPlayerRoom.getSceneActive()) {
-        //System.out.println("Current room does not have an active scene");
         view.println("Room does not have an active scene");
         return true;
       }
 
       if(targetRole.isTaken()) {
-        //System.out.println("Requested role is already taken");
         view.println("Requested role is already taken");
         return true;
       }
 
       if(targetRole.getRank() > currPlayer.getRank()) {
-        //System.out.format("Player not high enough level for requested role (required: %d, player rank: %d)\n",
-          //targetRole.getRank(), currPlayer.getRank());
         view.println("Player rank not high enough");
         return true;
       }
 
       currPlayer.takeRole(targetRole);
-      //System.out.format("%s took the role \'%s\'\n", currPlayer.getName(), targetRoleName);
       view.print(String.format("%s took the role \'%s\'\n", currPlayer.getName(), targetRoleName));
       return false;
     }
@@ -380,21 +372,21 @@ public class Board {
       if(currPlayer.hasRole()) {
         budget = currentRoom.getSceneDifficulty();
         roll = currPlayer.act();
-        System.out.format("Acting on role \'%s\', budget %d\n", currPlayer.getRole().getName(), budget);
+        view.println(String.format("Acting on role \'%s\', budget %d\n", currPlayer.getRole().getName(), budget));
         result = currentRoom.shootScene(roll);
         if(result >= 0) {
-          System.out.print("Roll successful, ");
+          view.print("Roll successful, ");
           if(currPlayer.hasSceneRole()) {
-            System.out.format("%s earns 2 credits\n", currPlayer.getName());
+            view.print(String.format("%s earns 2 credits\n", currPlayer.getName()));
             modifyMoney(0, 2, currPlayer);
           }
           else {
-            System.out.format("%s earns 1 credit and 1 dollar\n", currPlayer.getName());
+            view.print(String.format("%s earns 1 credit and 1 dollar\n", currPlayer.getName()));
             modifyMoney(1, 1, currPlayer);
           }
 
           if(result == 0) {
-            System.out.println("All shots completed, scene wrap");
+            view.println("All shots completed, scene wrap");
 
             List<Player> playersInRoom = getPlayersInRoom(currentRoom);
 
@@ -406,7 +398,7 @@ public class Board {
               List<Role> sceneRoles = currentRoom.getSceneRoles();
               int roleIndex = sceneRoles.size() - 1;
               Player targetPlayer;
-              System.out.format("Bonus dice rolled: %s\n", bonuses.toString());
+              view.print(String.format("Bonus dice rolled: %s\n", bonuses.toString()));
               for(int i = 0; i < bonuses.size(); i++) {
                 if(sceneRoles.get(roleIndex).isTaken()) {
                   targetPlayer = getPlayerInRole(sceneRoles.get(roleIndex), playersInRoom);

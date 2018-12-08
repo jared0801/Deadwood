@@ -11,6 +11,7 @@ public class Room {
     private int[] hw;
     private int[][] takeXy;
     private int[][] takeHw;
+    private boolean visited;
 
     public Room(String newName, int shots, List<String> neighborNames, List<Role> roles, int[] xyVal, int[] hwVal, int[][] takeXyVal, int[][] takeHwVal) {
       name = newName;
@@ -61,12 +62,26 @@ public class Room {
 
     public void setScene(Scene newScene) {
       currentShots = 0;
+      visited = false;
       currentScene = newScene;
       return;
     }
 
     public Scene getScene() {
       return currentScene;
+    }
+
+    public String getSceneImg() {
+      return currentScene.getImgFile();
+    }
+
+    public boolean getVisited() {
+      return visited;
+    }
+
+    public void visit() {
+      visited = true;
+      return;
     }
 
     public Role getRoleByName(String target) {
