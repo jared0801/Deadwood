@@ -81,7 +81,7 @@ public class Player {
     public int act() {
       int rollAmount = rollDice(1);
       int total = rollAmount + chips;
-      System.out.format("Player rolled %d (%d + %d chips)\n", total, rollAmount, chips);
+      BoardViewManager.getInstance().print(String.format("Player rolled %d (%d + %d chips)\n", total, rollAmount, chips));
       return total;
     }
 

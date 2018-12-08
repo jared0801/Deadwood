@@ -89,6 +89,16 @@ public class Board {
       return;
     }
 
+    public void turnEnd() {
+      if(!checkDayCont()) {
+        newDay();
+        checkGameEnd();
+      }
+      else {
+        nextTurn();
+      }
+    }
+
     public boolean checkGameEnd() {
       if(currentDay > totalDays) {
         endGame();
@@ -111,8 +121,8 @@ public class Board {
           winner = players.get(i);
         }
       }
-      view.print(String.format("\n%s won with %d points\n", winner.getName(), maxScore));
-      view.println("Gameover, thank you for playing Deadwood!");
+      view.showPopUp(String.format("\n%s won with %d points\n", winner.getName(), maxScore));
+      view.showPopUp("Gameover, thank you for playing Deadwood!");
       activeGame = false;
       return;
     }
@@ -341,27 +351,27 @@ public class Board {
       Role targetRole = currPlayerRoom.getRoleByName(targetRoleName);
       if(targetRole == null) {
         System.out.format("Unrecognized role: \'%s\'\n", targetRoleName);
-        return true;
+        return false;
       }
 
       if(!currPlayerRoom.getSceneActive()) {
         view.println("Room does not have an active scene");
-        return true;
+        return false;
       }
 
       if(targetRole.isTaken()) {
         view.println("Requested role is already taken");
-        return true;
+        return false;
       }
 
       if(targetRole.getRank() > currPlayer.getRank()) {
         view.println("Player rank not high enough");
-        return true;
+        return false;
       }
 
       currPlayer.takeRole(targetRole);
       view.print(String.format("%s took the role \'%s\'\n", currPlayer.getName(), targetRoleName));
-      return false;
+      return true;
     }
 
     public boolean playerAct(Player currPlayer) {
@@ -386,7 +396,7 @@ public class Board {
           }
 
           if(result == 0) {
-            view.println("All shots completed, scene wrap");
+            view.showPopUp("All shots completed, scene wrap");
 
             List<Player> playersInRoom = getPlayersInRoom(currentRoom);
 
@@ -402,7 +412,7 @@ public class Board {
               for(int i = 0; i < bonuses.size(); i++) {
                 if(sceneRoles.get(roleIndex).isTaken()) {
                   targetPlayer = getPlayerInRole(sceneRoles.get(roleIndex), playersInRoom);
-                  System.out.format("%s receives %d dollars\n", targetPlayer.getName(), bonuses.get(i));
+                  view.print(String.format("%s receives %d dollars\n", targetPlayer.getName(), bonuses.get(i)));
                   modifyMoney(bonuses.get(i), 0, targetPlayer);
                 }
                 roleIndex--;
@@ -415,13 +425,11 @@ public class Board {
               for(int i = 0; i < playersInRoom.size(); i++) {
                 targetPlayer = playersInRoom.get(i);
                 if(targetPlayer.hasRole() && !targetPlayer.hasSceneRole()) {
-                  System.out.format("%s receives %d dollars\n", targetPlayer.getName(), targetPlayer.getRole().getRank());
+                  view.print(String.format("%s receives %d dollars\n", targetPlayer.getName(), targetPlayer.getRole().getRank()));
                   modifyMoney(targetPlayer.getRole().getRank(), 0, targetPlayer);
                 }
               }
             }
-
-            // remove players from their roles
             for(int i = 0; i < playersInRoom.size(); i++) {
               playersInRoom.get(i).leaveRole();
             }
@@ -429,17 +437,14 @@ public class Board {
           }
         }
         else if(!currPlayer.hasSceneRole()) {
-          System.out.format("Unsuccessful roll, %s earns 1 dollar\n", currPlayer.getName());
+          view.print(String.format("Unsuccessful roll, %s earns 1 dollar\n", currPlayer.getName()));
           modifyMoney(1, 0, currPlayer);
         }
         else {
-          System.out.println("Unsuccessful roll");
+          view.println("Unsuccessful roll");
         }
-
         return false;
       }
-
-      //System.out.println("Player does not have a role");
       view.println("Player does not have a role");
       return true;
     }
@@ -447,11 +452,9 @@ public class Board {
     public boolean playerRehearse(Player currPlayer) {
       if(currPlayer.hasRole() && currPlayer.getChips() < currPlayer.getRoom().getSceneDifficulty()) {
         currPlayer.rehearse();
-        System.out.format("%s now has %d chips (scene budget: %d)\n", currPlayer.getName(), currPlayer.getChips(), currPlayer.getRoom().getSceneDifficulty());
+        view.print(String.format("%s now has %d chips (scene budget: %d)\n", currPlayer.getName(), currPlayer.getChips(), currPlayer.getRoom().getSceneDifficulty()));
         return false;
       }
-
-      //System.out.println("Player does not have a role or has too many chips");
       view.println("Player does not have a role or has too many chips");
       return true;
     }
@@ -459,19 +462,19 @@ public class Board {
     public void playerUpgrade(Player currPlayer, int targetRank, int moneyType) {
       if(currPlayer.getRoom().getName().equals("office")) {
         if(targetRank > 6 || targetRank < 2) {
-          System.out.println("Player can't upgrade to that level (min 2, max 6)");
+          view.showPopUp("Player can't upgrade to that level (min 2, max 6)");
           return;
         }
 
         if(currPlayer.getRank() >= targetRank) {
-          System.out.format("Target rank %d is lower or equal to current rank %d\n", targetRank, currPlayer.getRank());
+          view.showPopUp("Target rank is lower or equal to current rank");
           return;
         }
 
         if(moneyType == 0) {
           if(currPlayer.getDollars() >= upgrades[0][targetRank-2]) {
             currPlayer.modifyDollars(-upgrades[0][targetRank-2]);
-            System.out.format("Upgrading %s from rank %d to rank %d, deducting %d dollars\n", currPlayer.getName(), currPlayer.getRank(), targetRank, upgrades[0][targetRank-2]);
+            view.showPopUp(String.format("Upgrading %s from rank %d to rank %d, deducting %d dollars\n", currPlayer.getName(), currPlayer.getRank(), targetRank, upgrades[0][targetRank-2]));
             currPlayer.upgradeToRank(targetRank);
           }
           else {
@@ -481,19 +484,18 @@ public class Board {
         else if(moneyType == 1) {
           if(currPlayer.getCredits() >= upgrades[1][targetRank-2]) {
             currPlayer.modifyCredits(-upgrades[1][targetRank-2]);
-            System.out.format("Upgrading %s from rank %d to rank %d, deducting %d credits\n", currPlayer.getName(), currPlayer.getRank(), targetRank, upgrades[1][targetRank-2]);
+            view.showPopUp(String.format("Upgrading %s from rank %d to rank %d, deducting %d credits\n", currPlayer.getName(), currPlayer.getRank(), targetRank, upgrades[1][targetRank-2]));
             currPlayer.upgradeToRank(targetRank);
           }
           else {
-            System.out.println("Player does not have enough credits to upgrade");
+            view.showPopUp("Player does not have enough credits to upgrade");
           }
         }
         else {
-          System.out.format("Invalid money type \'%d\' entered\n", moneyType);
+          view.showPopUp("Invalid money type entered");
         }
       }
       else {
-        //System.out.println("Player is not in the Casting Office");
         view.println("Player is not in the Casting Office");
       }
       return;

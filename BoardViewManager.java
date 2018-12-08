@@ -41,10 +41,17 @@ public class BoardViewManager {
 
   Player currPlayer;
   Room currRoom;
+
   boolean playerMoving = false;
   boolean playerMoved = false;
-  boolean turnContinue = true;
+
   boolean takingRole = false;
+  boolean tookRole = false;
+
+  boolean playerActed = false;
+
+  boolean turnContinue = true;
+
 
   private BoardViewManager() {
 
@@ -209,6 +216,10 @@ public class BoardViewManager {
     bPane.add(bTakeRole, new Integer(2));
   }
 
+  public void showPopUp(String msg) {
+    JOptionPane.showMessageDialog(null, msg);
+  }
+
   private void initCards() {
     cardLabels = new JLabel[10];
 
@@ -301,16 +312,6 @@ public class BoardViewManager {
     playerLabels[playerIndex].setBounds(loc);
   }
 
-  private void turnEnd() {
-    if(!gameBoard.checkDayCont()) {
-      gameBoard.newDay();
-      gameBoard.checkGameEnd();
-    }
-    else {
-      gameBoard.nextTurn();
-    }
-  }
-
   class boardMouseListener implements MouseListener {
     List<String> neighbors;
 
@@ -326,13 +327,35 @@ public class BoardViewManager {
         currRoom = currPlayer.getRoom();
 
         if(e.getSource() == bAct) {
-          turnContinue = gameBoard.playerAct(currPlayer);
+          if(!tookRole) {
+            if(!playerActed) {
+              gameBoard.playerAct(currPlayer);
+              playerActed = true;
+            }
+            else {
+              println("Player has already acted this turn");
+            }
+          }
+          else {
+              println("Player took a role this turn");
+          }
         }
         else if(e.getSource() == bRehearse) {
-          turnContinue = gameBoard.playerRehearse(currPlayer);
+          if(!tookRole) {
+            if(!playerActed) {
+              gameBoard.playerRehearse(currPlayer);
+              playerActed = true;
+            }
+            else {
+              println("Player has already acted this turn");
+            }
+          }
+          else {
+            println("Player took a role this turn");
+          }
         }
         else if(e.getSource() == bMove) {
-          if(!playerMoved) {
+          if(!playerMoved && !playerActed) {
             playerMoving = true;
             println("Select a room to move to");
 
@@ -435,10 +458,15 @@ public class BoardViewManager {
         }
 
         if(!turnContinue) {
-          turnEnd();
+          gameBoard.turnEnd();
           playerMoving = false;
           playerMoved = false;
+
           takingRole = false;
+          tookRole = false;
+
+          playerActed = false;
+
           turnContinue = true;
         }
       }
