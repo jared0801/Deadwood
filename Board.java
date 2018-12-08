@@ -26,36 +26,6 @@ public class Board {
       view = BoardViewManager.getInstance();
     }
 
-    /* function runGame
-       purpose: runs the initilized Deadwood game, part of the public interface
-    */
-    public void runGame() {
-      /*
-      while(true) {
-        runDay();
-        newDay();
-        if(currentDay > totalDays) {
-          endGame();
-          return;
-        }
-      }
-      */
-    }
-
-    /* function runDay
-       purpose: handles running each day
-    */
-    private void runDay() {
-      //System.out.format("\nDay %d\n", currentDay);
-      view.print(String.format("\nDay %d\n", currentDay));
-      boolean running = true;
-      while(running) {
-        //inputManager.takeTurn(getCurrentPlayer(), this);
-        activePlayerIndex = (activePlayerIndex + 1) % totalPlayers;
-        running = checkDayCont();
-      }
-    }
-
     public void forceEndDay() {
       Room currentRoom;
       for(int i = 0; i < rooms.length; i++) {
@@ -69,13 +39,15 @@ public class Board {
     /* function newDay
        purpose: handles the creation of new days
     */
-    private void newDay() {
+    public void newDay() {
       currentDay++;
+      view.print(String.format("\nDay %d\n", currentDay));
       view.print(String.format("\nYour turn, %s\n", getCurrentPlayer().getName()));
 
       // move all players to the starting trailer room
       for(int i = 0; i < totalPlayers; i++) {
         forceMovePlayer(players.get(i), "trailer");
+        view.movePlayersTrailer();
         players.get(i).leaveRole();
       }
 
@@ -90,6 +62,9 @@ public class Board {
             if(sceneRef.getActive() && !sceneRef.getAssigned()) {
               rooms[i].setScene(sceneRef);
               sceneRef.assign();
+
+              /* view manager create scene role labels */
+
               notAssigned = false;
             }
           }
@@ -102,10 +77,11 @@ public class Board {
        purpose: handles creating the game, part of the public interface
     */
     public void createGame() {
-      //String[] playerNames = inputManager.getPlayers(totalPlayers);
       String[] playerNames = view.getPlayerNames();
+      Room trailer = getRoomByName("trailer");
       for(int i = 0; i < totalPlayers; i++) {
         players.add(new Player(playerNames[i]));
+        players.get(i).setRoom(trailer);
       }
       activeGame = true;
       newDay();
@@ -113,10 +89,18 @@ public class Board {
       return;
     }
 
+    public boolean checkGameEnd() {
+      if(currentDay > totalDays) {
+        endGame();
+        return true;
+      }
+      return false;
+    }
+
     /* function endGame
        purpose: handles the gameover event for Deadwood
     */
-    private void endGame() {
+    public void endGame() {
       int maxScore = 0;
       Player winner = null;
       for(int i = 0; i < players.size(); i++) {
@@ -150,7 +134,7 @@ public class Board {
     }
 
     public Room[] getRooms() {
-    return rooms;
+      return rooms;
   }
 
     public boolean isActiveGame() { return activeGame; }
@@ -255,7 +239,7 @@ public class Board {
     /* function checkDayCont
        purpose: checks if the day should continue or end
     */
-    private boolean checkDayCont() {
+    public boolean checkDayCont() {
       Room currentRoom;
       int scenesRemaining = 0;
       for(int i = 0; i < rooms.length; i++) {

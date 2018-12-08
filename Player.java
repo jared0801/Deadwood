@@ -6,6 +6,7 @@ public class Player {
     private boolean hasRole;
     private Role currentRole;
     private Room currentRoom;
+    private BoardViewManager view;
 
     public Player (String newName) {
       name = newName;
@@ -16,6 +17,7 @@ public class Player {
       currentRole = null;
       currentRoom = null;
       chips = 0;
+      view = BoardViewManager.getInstance();
     }
 
     public String getName() {
@@ -70,6 +72,10 @@ public class Player {
 
     public Room getRoom() {
       return currentRoom;
+    }
+
+    public void setRoom(Room newRoom) {
+      currentRoom = newRoom;
     }
 
     public int act() {

@@ -45,6 +45,7 @@ public class BoardViewManager {
   boolean playerMoved = false;
   boolean turnContinue = true;
   boolean takingRole = false;
+  boolean playerTurn = false;
 
   private BoardViewManager() {
 
@@ -248,6 +249,7 @@ public class BoardViewManager {
 	  }
   }
 */
+
   private void initTextArea() {
     bTextArea = new JTextArea(5, 20);
     bTextArea.setEditable(false);
@@ -287,6 +289,48 @@ public class BoardViewManager {
     return playerNames;
   }
 
+  public void movePlayersTrailer() {
+    List<Player> players = gameBoard.getPlayers();
+
+    for(int i = 0; i < totalPlayers; i++) {
+      Player currPlayer = players.get(i);
+      movePlayerRoom(currPlayer.getRoom(), "trailer", i);
+    }
+  }
+
+  private void movePlayerRoom(Room currRoom, String targetRoomName, int playerIndex) {
+    int roomIndex = gameBoard.getRoomIndexByName(targetRoomName);
+
+    // Read just other players in curr room
+    List<Player> otherPlayers = gameBoard.getPlayersInRoom(currRoom);
+    for(int j = 0; j < otherPlayers.size(); j++)
+    {
+      Rectangle loc = new Rectangle(
+              currRoom.getXy()[0] + j * 50,
+              currRoom.getXy()[1],
+              46, 46);
+      playerLabels[gameBoard.getPlayerIndexByName(otherPlayers.get(j).getName())].setBounds(loc);
+    }
+
+    // Adjust location for other players in the set
+    int xOffset = gameBoard.getPlayersInRoom(roomArr[roomIndex]).size() - 1;
+    Rectangle loc = new Rectangle(
+      gameBoard.getRoomByName(targetRoomName).getXy()[0] + xOffset * 50,
+      gameBoard.getRoomByName(targetRoomName).getXy()[1],
+      46, 46);
+    playerLabels[playerIndex].setBounds(loc);
+  }
+
+  private void turnEnd() {
+    if(!gameBoard.checkDayCont()) {
+      gameBoard.newDay();
+      gameBoard.checkGameEnd();
+    }
+    else {
+      gameBoard.nextTurn();
+    }
+  }
+
   class boardMouseListener implements MouseListener {
     List<String> neighbors;
 
@@ -315,9 +359,7 @@ public class BoardViewManager {
             // Highlight available rooms
             for(int j = 0; j < neighbors.size(); j++) {
               int ind = gameBoard.getRoomIndexByName(neighbors.get(j));
-              //if(ind >= 0 && ind < 10){
-                roomLabels[ind].setIcon(new ImageIcon("media/cards/OpenCard.png"));
-              //}
+              roomLabels[ind].setIcon(new ImageIcon("media/cards/OpenCard.png"));
             }
 
           }
@@ -372,31 +414,14 @@ public class BoardViewManager {
               playerMoved = gameBoard.movePlayer(currPlayer, targetRoomName);
 
               if(playerMoved) {
-                //Readjust other players in curr room
-                List<Player> otherPlayers = gameBoard.getPlayersInRoom(currRoom);
-                for(int j = 0; j < otherPlayers.size(); j++)
-                {
-                  Rectangle loc = new Rectangle(
-                          currRoom.getXy()[0] + j * 50,
-                          currRoom.getXy()[1],
-                          46, 46);
-                  playerLabels[gameBoard.getPlayerIndexByName(otherPlayers.get(j).getName())].setBounds(loc);
-                }
-
-                //Adjust location for other players in the set
-                int xOffset = gameBoard.getPlayersInRoom(roomArr[roomIndex]).size() - 1;
-                Rectangle loc = new Rectangle(
-                  gameBoard.getRoomByName(targetRoomName).getXy()[0] + xOffset * 50,
-                  gameBoard.getRoomByName(targetRoomName).getXy()[1],
-                  46, 46);
-                playerLabels[gameBoard.getCurrentPlayerIndex()].setBounds(loc);
+                movePlayerRoom(currRoom, targetRoomName, gameBoard.getCurrentPlayerIndex());
               }
             }
           }
         }
 
         if(!turnContinue) {
-          gameBoard.nextTurn();
+          turnEnd();
           playerMoving = false;
           playerMoved = false;
           takingRole = false;
