@@ -32,7 +32,12 @@ public class Deadwood {
 
       // Take input from the user about number of players
       do {
-        numPlayers = Integer.parseInt(JOptionPane.showInputDialog(null, "How many players?"));
+        String temp = JOptionPane.showInputDialog(null, "How many players?");
+        try {
+          numPlayers = Integer.parseInt(temp);
+        } catch(NumberFormatException e) {
+          numPlayers = 0;
+        }
       } while (numPlayers < 2 || numPlayers > 6);
 
       boardCtrl = new Board(numPlayers, roomArr, sceneArr, upgrades);
