@@ -39,6 +39,10 @@ public class Room {
       return name;
     }
 
+    public int getShotCounter() {
+        return shotCounter;
+    }
+
     public int[] getXy() {
       return xy;
     }

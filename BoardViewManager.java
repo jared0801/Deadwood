@@ -18,7 +18,9 @@ public class BoardViewManager {
   JLabel boardlabel;
   JLabel playerLabels[];
   JLabel mLabel;
-  JLabel roomLabels[][];
+  JLabel roomLabels[];
+  JLabel takeLabels[][];
+  JLabel roleLabels[][];
   JLabel trailerLabel;
   JLabel officeLabel;
   JLabel cardLabels[];
@@ -70,8 +72,8 @@ public class BoardViewManager {
     initPlayers();
     initMenu();
     initTextArea();
-    initRoomRoles();
-    //initCards();
+    //initRoomRoles();
+    initCards();
 
     bFrame.setVisible(true);
     println("Welcome to Deadwood!\n");
@@ -80,6 +82,8 @@ public class BoardViewManager {
   private void initLabels() {
     // Create labels for each room
     roomLabels = new JLabel[12];
+    takeLabels = new JLabel[12][];
+    roleLabels = new JLabel[12][];
     for(int i = 0; i < 10; i++) {
         roomLabels[i] = new JLabel();
         roomLabels[i].setBounds(roomArr[i].getXy()[0], roomArr[i].getXy()[1], roomArr[i].getHw()[1], roomArr[i].getHw()[0]);
@@ -88,6 +92,29 @@ public class BoardViewManager {
         roomLabels[i].setVisible(true);
         roomLabels[i].setOpaque(false);
         bPane.add(roomLabels[i], new Integer(2));
+
+        takeLabels[i] = new JLabel[roomArr[i].getShotCounter()];
+        for(int j = 0; j < takeLabels[i].length; j++) {
+          takeLabels[i][j] = new JLabel();
+          takeLabels[i][j].setBounds(roomArr[i].getTakeXy()[0][j], roomArr[i].getTakeXy()[1][j], roomArr[i].getTakeHw()[1][j], roomArr[i].getTakeHw()[0][j]);
+          takeLabels[i][j].addMouseListener(new boardMouseListener());
+          takeLabels[i][j].setIcon(new ImageIcon("media/shot.png"));
+          takeLabels[i][j].setVisible(true);
+          bPane.add(takeLabels[i][j], new Integer(2));
+        }
+
+        roleLabels[i] = new JLabel[roomArr[i].getOffCardRoles().size()];
+        for(int j = 0; j < roleLabels[i].length; j++) {
+          roleLabels[i][j] = new JLabel();
+          roleLabels[i][j].setBounds(roomArr[i].getOffCardRoles().get(j).getXy()[0],
+                  roomArr[i].getOffCardRoles().get(j).getXy()[1],
+                  roomArr[i].getOffCardRoles().get(j).getHw()[1],
+                  roomArr[i].getOffCardRoles().get(j).getHw()[0]);
+          roleLabels[i][j].addMouseListener(new boardMouseListener());
+          roleLabels[i][j].setOpaque(true);
+          roleLabels[i][j].setVisible(true);
+          bPane.add(roleLabels[i][j], new Integer(2));
+        }
     }
 
     // Add trailer and office room labels
@@ -196,8 +223,8 @@ public class BoardViewManager {
       bPane.add(cardLabels[i], new Integer(1));
     }
   }
-
-  private initRoomRoles(Room currRoom) {
+/*
+  private void initRoomRoles(Room currRoom) {
 	  List<Role> offCardRoles = currRoom.getOffCardRoles();
 	  JLabel offCardLabels[] = new JLabel[offCardRoles.size()];
 
@@ -220,7 +247,7 @@ public class BoardViewManager {
 		  bPane.add(sceneLabels[i], new Integer(1));
 	  }
   }
-
+*/
   private void initTextArea() {
     bTextArea = new JTextArea(5, 20);
     bTextArea.setEditable(false);
