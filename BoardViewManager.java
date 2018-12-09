@@ -37,7 +37,7 @@ public class BoardViewManager {
 
   ImageIcon boardIcon;
 
-  String playerImages[] = {"media/dice/b1.png", "media/dice/c1.png", "media/dice/g1.png", "media/dice/o1.png", "media/dice/p1.png", "media/dice/r1.png"};
+  String playerImages[] = {"media/dice/b", "media/dice/c", "media/dice/g", "media/dice/o", "media/dice/p", "media/dice/r"};
 
   Player currPlayer;
   Room currRoom;
@@ -162,7 +162,7 @@ public class BoardViewManager {
     // Add a dice to represent a player.
     for (int i = 0; i < totalPlayers; i++) {
         playerLabels[i] = new JLabel();
-        playerLabels[i].setIcon(new ImageIcon(playerImages[i]));
+        playerLabels[i].setIcon(new ImageIcon(playerImages[i] + "1.png"));
 
         playerLabels[i].setBounds(trailerRoom.getXy()[0] + 50*i, trailerRoom.getXy()[1],46,46);
         playerLabels[i].setVisible(true);
@@ -374,10 +374,32 @@ public class BoardViewManager {
         }
         else if(e.getSource() == bUpgrade) {
           if(currRoom.getName().equals("office")) {
-            int targetRank = Integer.parseInt(JOptionPane.showInputDialog(null, "What rank? (2-6)"));
-            int moneyType = Integer.parseInt(JOptionPane.showInputDialog(null, "What currency? (0: dollar, 1: credit)"));
 
-            gameBoard.playerUpgrade(currPlayer, targetRank, moneyType);
+            int targetRank;
+            int moneyType;
+
+            do {
+              String temp = JOptionPane.showInputDialog(null, "What rank? (2-6)");
+              try {
+                targetRank = Integer.parseInt(temp);
+              } catch(NumberFormatException exception) {
+                targetRank = 0;
+              }
+            } while (targetRank < 2 || targetRank > 6);
+
+            do {
+              String temp = JOptionPane.showInputDialog(null, "What rank? (2-6)");
+              try {
+                moneyType = Integer.parseInt(temp);
+              } catch(NumberFormatException exception) {
+                moneyType = 0;
+              }
+            } while (moneyType < 0 || moneyType > 1);
+
+            if(gameBoard.playerUpgrade(currPlayer, targetRank, moneyType) == 1) {
+              int cPlayerIndex = gameBoard.getCurrentPlayerIndex();
+              playerLabels[cPlayerIndex].setIcon(new ImageIcon(playerImages[cPlayerIndex] + gameBoard.getPlayers().get(cPlayerIndex).getRank() + ".png"));
+            }
           }
           else {
             println("Player is not at the Casting Office");
