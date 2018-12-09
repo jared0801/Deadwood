@@ -25,6 +25,10 @@ public class BoardViewManager {
   JLabel officeLabel;
   JLabel cardLabels[];
 
+  JLabel dayLabel;
+  JTextArea infoTextArea;
+  JLabel currPlayerLabel;
+
   JButton bAct;
   JButton bRehearse;
   JButton bMove;
@@ -78,6 +82,7 @@ public class BoardViewManager {
     initLabels();
     initPlayers();
     initMenu();
+    initPlayerDisplay();
     initTextArea();
     initCards();
 
@@ -152,7 +157,7 @@ public class BoardViewManager {
     bPane.add(boardlabel, new Integer(0));
 
     // Set the size of the GUI
-    bFrame.setSize(boardIcon.getIconWidth()+200,boardIcon.getIconHeight());
+    bFrame.setSize(boardIcon.getIconWidth()+250,boardIcon.getIconHeight());
   }
 
   private void initPlayers() {
@@ -173,38 +178,38 @@ public class BoardViewManager {
   private void initMenu() {
     // Create the Menu for action buttons
     mLabel = new JLabel("MENU");
-    mLabel.setBounds(boardIcon.getIconWidth()+80,0,150,20);
+    mLabel.setBounds(boardIcon.getIconWidth()+105,0,150,20);
     bPane.add(mLabel,new Integer(2));
 
     // Create Action buttons
     bAct = new JButton("ACT");
     bAct.setBackground(Color.white);
-    bAct.setBounds(boardIcon.getIconWidth()+25, 30,150, 20);
+    bAct.setBounds(boardIcon.getIconWidth()+25,30,200,20);
     bAct.addMouseListener(new boardMouseListener());
 
     bRehearse = new JButton("REHEARSE");
     bRehearse.setBackground(Color.white);
-    bRehearse.setBounds(boardIcon.getIconWidth()+25,60,150, 20);
+    bRehearse.setBounds(boardIcon.getIconWidth()+25,60,200,20);
     bRehearse.addMouseListener(new boardMouseListener());
 
     bMove = new JButton("MOVE");
     bMove.setBackground(Color.white);
-    bMove.setBounds(boardIcon.getIconWidth()+25,90,150, 20);
+    bMove.setBounds(boardIcon.getIconWidth()+25,90,200,20);
     bMove.addMouseListener(new boardMouseListener());
 
     bEnd = new JButton("END");
     bEnd.setBackground(Color.white);
-    bEnd.setBounds(boardIcon.getIconWidth()+25,120,150,20);
+    bEnd.setBounds(boardIcon.getIconWidth()+25,120,200,20);
     bEnd.addMouseListener(new boardMouseListener());
 
     bTakeRole = new JButton("TAKE ROLE");
     bTakeRole.setBackground(Color.white);
-    bTakeRole.setBounds(boardIcon.getIconWidth()+25,150,150,20);
+    bTakeRole.setBounds(boardIcon.getIconWidth()+25,150,200,20);
     bTakeRole.addMouseListener(new boardMouseListener());
 
     bUpgrade = new JButton("UPGRADE");
     bUpgrade.setBackground(Color.white);
-    bUpgrade.setBounds(boardIcon.getIconWidth()+25,180,150,20);
+    bUpgrade.setBounds(boardIcon.getIconWidth()+25,180,200,20);
     bUpgrade.addMouseListener(new boardMouseListener());
 
     // Place the action buttons in the top layer
@@ -214,6 +219,32 @@ public class BoardViewManager {
     bPane.add(bEnd, new Integer(2));
     bPane.add(bUpgrade, new Integer(2));
     bPane.add(bTakeRole, new Integer(2));
+  }
+
+  private void initPlayerDisplay() {
+    dayLabel = new JLabel("Day 1");
+    dayLabel.setBounds(boardIcon.getIconWidth()+105,210,150,20);
+    bPane.add(dayLabel,new Integer(2));
+
+    currPlayerLabel = new JLabel();
+    currPlayerLabel.setIcon(new ImageIcon(playerImages[0] + "1.png"));
+    currPlayerLabel.setBounds(boardIcon.getIconWidth()+105,236,46,46);
+    bPane.add(currPlayerLabel,new Integer(2));
+
+    infoTextArea = new JTextArea(5, 20);
+    infoTextArea.setEditable(false);
+    infoTextArea.setBounds(boardIcon.getIconWidth() + 10,290,230,100);
+    bPane.add(infoTextArea, new Integer(2));
+  }
+
+  public void updateInfoPanel(int day, int playerIndex, Player player) {
+    currPlayerLabel.setIcon(new ImageIcon(playerImages[playerIndex] + player.getRank() + ".png"));
+    dayLabel.setText("Day " + day);
+    infoTextArea.setText(String.format("Name: %s\nRank: %d\nDollars: %d\nCredits: %d\nRoom: %s\n",
+                                      player.getName(), player.getRank(), player.getDollars(), player.getCredits(), player.getRoom().getName()));
+    if(player.hasRole()) {
+      infoTextArea.append(String.format("Role: %s", player.getRole().getName()));
+    }
   }
 
   public void showPopUp(String msg) {
@@ -251,7 +282,7 @@ public class BoardViewManager {
     bTextArea.setCaretPosition(bTextArea.getDocument().getLength());
 
     bScrollPane = new JScrollPane(bTextArea);
-    bScrollPane.setBounds(boardIcon.getIconWidth() + 10, boardIcon.getIconHeight() - 500, 180, 500);
+    bScrollPane.setBounds(boardIcon.getIconWidth() + 10, boardIcon.getIconHeight() - 500, 230, 490);
     bPane.add(bScrollPane, new Integer(2));
   }
 
@@ -341,7 +372,7 @@ public class BoardViewManager {
               playerActed = gameBoard.playerAct(currPlayer);
               if(playerActed) {
                 int roomIndex = gameBoard.getRoomIndexByName(currRoom.getName());
-                takeLabels[roomIndex][currRoom.getCurrentShots() - 1].setVisible(false);
+                takeLabels[roomIndex][(currRoom.getCurrentShots() > 0 ? currRoom.getCurrentShots() - 1 : 0)].setVisible(false);
                 if(!currRoom.getSceneActive()) {
                   cardLabels[gameBoard.getRoomIndexByName(currRoom.getName())].setVisible(false);
                   movePlayerRoom(currRoom, currRoom.getName(), gameBoard.getCurrentPlayerIndex());
@@ -370,7 +401,7 @@ public class BoardViewManager {
           }
         }
         else if(e.getSource() == bMove) {
-          if(!playerMoved && !playerActed) {
+          if(!playerMoved && !currPlayer.hasRole()) {
             playerMoving = true;
             println("Select a room to move to");
 
@@ -403,7 +434,7 @@ public class BoardViewManager {
             } while (targetRank < 2 || targetRank > 6);
 
             do {
-              String temp = JOptionPane.showInputDialog(null, "What rank? (2-6)");
+              String temp = JOptionPane.showInputDialog(null, "Dollars or credits? (0/1)");
               try {
                 moneyType = Integer.parseInt(temp);
               } catch(NumberFormatException exception) {

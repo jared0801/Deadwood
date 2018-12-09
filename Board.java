@@ -41,6 +41,7 @@ public class Board {
     */
     public void newDay() {
       currentDay++;
+      view.updateInfoPanel(currentDay, activePlayerIndex, getCurrentPlayer());
       view.print(String.format("\nDay %d\n", currentDay));
       view.print(String.format("\nYour turn, %s\n", getCurrentPlayer().getName()));
       view.resetCards();
@@ -97,6 +98,7 @@ public class Board {
       }
       else {
         nextTurn();
+        view.updateInfoPanel(currentDay, activePlayerIndex, getCurrentPlayer());
       }
     }
 
@@ -148,7 +150,7 @@ public class Board {
     public boolean isActiveGame() { return activeGame; }
 
     public Player getCurrentPlayer() {
-    return players.get(activePlayerIndex);
+      return players.get(activePlayerIndex);
   }
 
     public void setCurrentPlayer(Player p) {
