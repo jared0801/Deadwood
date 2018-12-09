@@ -237,6 +237,9 @@ public class BoardViewManager {
   public void resetCards() {
     for(int i = 0; i < 10; i++) {
       cardLabels[i].setIcon(new ImageIcon("media/cards/CardBack.jpg"));
+      for(int j = 0; j < takeLabels[i].length; j++) {
+        takeLabels[i][j].setVisible(true);
+      }
     }
   }
 
@@ -336,9 +339,13 @@ public class BoardViewManager {
           if(!tookRole) {
             if(!playerActed) {
               playerActed = gameBoard.playerAct(currPlayer);
-              if(!currRoom.getSceneActive()) {
-                cardLabels[gameBoard.getRoomIndexByName(currRoom.getName())].setVisible(false);
-                movePlayerRoom(currRoom, currRoom.getName(), gameBoard.getCurrentPlayerIndex());
+              if(playerActed) {
+                int roomIndex = gameBoard.getRoomIndexByName(currRoom.getName());
+                takeLabels[roomIndex][currRoom.getCurrentShots() - 1].setVisible(false);
+                if(!currRoom.getSceneActive()) {
+                  cardLabels[gameBoard.getRoomIndexByName(currRoom.getName())].setVisible(false);
+                  movePlayerRoom(currRoom, currRoom.getName(), gameBoard.getCurrentPlayerIndex());
+                }
               }
             }
             else {
