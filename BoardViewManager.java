@@ -234,6 +234,12 @@ public class BoardViewManager {
     }
   }
 
+  public void resetCards() {
+    for(int i = 0; i < 10; i++) {
+      cardLabels[i].setIcon(new ImageIcon("media/cards/CardBack.jpg"));
+    }
+  }
+
   private void initTextArea() {
     bTextArea = new JTextArea(5, 20);
     bTextArea.setEditable(false);
@@ -329,8 +335,11 @@ public class BoardViewManager {
         if(e.getSource() == bAct) {
           if(!tookRole) {
             if(!playerActed) {
-              gameBoard.playerAct(currPlayer);
-              playerActed = true;
+              playerActed = gameBoard.playerAct(currPlayer);
+              if(!currRoom.getSceneActive()) {
+                cardLabels[gameBoard.getRoomIndexByName(currRoom.getName())].setVisible(false);
+                movePlayerRoom(currRoom, currRoom.getName(), gameBoard.getCurrentPlayerIndex());
+              }
             }
             else {
               println("Player has already acted this turn");
@@ -343,8 +352,7 @@ public class BoardViewManager {
         else if(e.getSource() == bRehearse) {
           if(!tookRole) {
             if(!playerActed) {
-              gameBoard.playerRehearse(currPlayer);
-              playerActed = true;
+              playerActed = gameBoard.playerRehearse(currPlayer);
             }
             else {
               println("Player has already acted this turn");
@@ -405,7 +413,6 @@ public class BoardViewManager {
         else if(takingRole) {
           int roomIndex = gameBoard.getRoomIndexByName(currRoom.getName());
           List<Role> roomRoles = currRoom.getOffCardRoles();
-          boolean tookRole = false;
 
           for(int i = 0; i < roleLabels[roomIndex].length; i++) {
             if(e.getSource() == roleLabels[roomIndex][i]) {

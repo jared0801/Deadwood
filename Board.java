@@ -43,6 +43,7 @@ public class Board {
       currentDay++;
       view.print(String.format("\nDay %d\n", currentDay));
       view.print(String.format("\nYour turn, %s\n", getCurrentPlayer().getName()));
+      view.resetCards();
 
       // move all players to the starting trailer room
       for(int i = 0; i < totalPlayers; i++) {
@@ -443,20 +444,27 @@ public class Board {
         else {
           view.println("Unsuccessful roll");
         }
-        return false;
+        return true;
       }
       view.println("Player does not have a role");
-      return true;
+      return false;
     }
 
     public boolean playerRehearse(Player currPlayer) {
-      if(currPlayer.hasRole() && currPlayer.getChips() < currPlayer.getRoom().getSceneDifficulty()) {
-        currPlayer.rehearse();
-        view.print(String.format("%s now has %d chips (scene budget: %d)\n", currPlayer.getName(), currPlayer.getChips(), currPlayer.getRoom().getSceneDifficulty()));
-        return false;
+      if(currPlayer.hasRole()) {
+        if(currPlayer.getChips() < currPlayer.getRoom().getSceneDifficulty()) {
+          currPlayer.rehearse();
+          view.print(String.format("%s now has %d chips\n", currPlayer.getName(), currPlayer.getChips()));
+          return true;
+        }
+        else {
+          view.println("Player has too many chips");
+        }
       }
-      view.println("Player does not have a role or has too many chips");
-      return true;
+      else {
+        view.println("Player does not have a role");
+      }
+      return false;
     }
 
     public void playerUpgrade(Player currPlayer, int targetRank, int moneyType) {
