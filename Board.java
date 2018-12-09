@@ -467,16 +467,16 @@ public class Board {
       return false;
     }
 
-    public void playerUpgrade(Player currPlayer, int targetRank, int moneyType) {
+    public int playerUpgrade(Player currPlayer, int targetRank, int moneyType) {
       if(currPlayer.getRoom().getName().equals("office")) {
         if(targetRank > 6 || targetRank < 2) {
           view.showPopUp("Player can't upgrade to that level (min 2, max 6)");
-          return;
+          return 0;
         }
 
         if(currPlayer.getRank() >= targetRank) {
           view.showPopUp("Target rank is lower or equal to current rank");
-          return;
+          return 0;
         }
 
         if(moneyType == 0) {
@@ -506,6 +506,6 @@ public class Board {
       else {
         view.println("Player is not in the Casting Office");
       }
-      return;
+      return 1;
     }
 }
