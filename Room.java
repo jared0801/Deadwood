@@ -84,6 +84,11 @@ public class Room {
       return;
     }
 
+    public void resetVisited() {
+      visited = false;
+      return;
+    }
+
     public Role getRoleByName(String target) {
       for(int i = 0; i < offCardRoles.size(); i++) {
         if(offCardRoles.get(i).getName().equals(target)) {

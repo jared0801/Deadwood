@@ -40,7 +40,6 @@ public class Player {
       currentRole = newRole;
       currentRole.take();
       hasRole = true;
-      chips = 0;
       return;
     }
 
@@ -53,6 +52,7 @@ public class Player {
         currentRole.leave();
         currentRole = null;
         hasRole = false;
+        chips = 0;
       }
       return;
     }

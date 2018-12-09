@@ -19,7 +19,12 @@ public class Board {
       players = new ArrayList<Player>(numPlayers);
       rooms = roomArr;
       currentDay = 0;
-      totalDays = 3;
+      if(totalPlayers > 3) {
+        totalDays = 4;
+      }
+      else {
+        totalDays = 3;
+      }
       scenes = sceneArr;
       upgrades = upgradeCosts;
       activeGame = false;
@@ -41,9 +46,8 @@ public class Board {
     */
     public void newDay() {
       currentDay++;
-      view.updateInfoPanel(currentDay, activePlayerIndex, getCurrentPlayer());
       view.print(String.format("\nDay %d\n", currentDay));
-      view.print(String.format("\nYour turn, %s\n", getCurrentPlayer().getName()));
+      view.print(String.format("\n==========\nYour turn, %s\n", getCurrentPlayer().getName()));
       view.resetCards();
 
       // move all players to the starting trailer room
@@ -55,6 +59,7 @@ public class Board {
 
       // assign scenes to rooms
       for(int i = 0; i < rooms.length; i++) {
+        rooms[i].resetVisited();
         String name = rooms[i].getName();
         if(!name.equals("trailer") && !name.equals("office")) {
           boolean notAssigned = true;
@@ -72,6 +77,7 @@ public class Board {
           }
         }
       }
+      view.updateInfoPanel(currentDay, activePlayerIndex, getCurrentPlayer());
       return;
     }
 
@@ -84,6 +90,14 @@ public class Board {
       for(int i = 0; i < totalPlayers; i++) {
         players.add(new Player(playerNames[i]));
         players.get(i).setRoom(trailer);
+        int bonus = 0;
+        if(totalPlayers == 5) {
+          bonus = 2;
+        }
+        else if(totalPlayers == 6) {
+          bonus = 4;
+        }
+        modifyMoney(0, bonus, players.get(i));
       }
       activeGame = true;
       newDay();
@@ -93,6 +107,7 @@ public class Board {
 
     public void turnEnd() {
       if(!checkDayCont()) {
+        activePlayerIndex = (activePlayerIndex + 1) % totalPlayers;
         newDay();
         checkGameEnd();
       }
@@ -159,7 +174,7 @@ public class Board {
 
     public void nextTurn() {
       activePlayerIndex = (activePlayerIndex + 1) % totalPlayers;
-      view.print(String.format("\nYour turn, %s\n", getCurrentPlayer().getName()));
+      view.print(String.format("\n==========\nYour turn, %s\n", getCurrentPlayer().getName()));
     }
 
     public int getCurrentPlayerIndex() { return activePlayerIndex; }
@@ -374,6 +389,7 @@ public class Board {
 
       currPlayer.takeRole(targetRole);
       view.print(String.format("%s took the role \'%s\'\n", currPlayer.getName(), targetRoleName));
+      view.updateInfoPanel(currentDay, activePlayerIndex, getCurrentPlayer());
       return true;
     }
 
@@ -382,74 +398,74 @@ public class Board {
       int roll = 0;
       int budget = 0;
       Room currentRoom = currPlayer.getRoom();
-      if(currPlayer.hasRole()) {
-        budget = currentRoom.getSceneDifficulty();
-        roll = currPlayer.act();
-        view.println(String.format("Acting on role \'%s\', budget %d\n", currPlayer.getRole().getName(), budget));
-        result = currentRoom.shootScene(roll);
-        if(result >= 0) {
-          view.print("Roll successful, ");
-          if(currPlayer.hasSceneRole()) {
-            view.print(String.format("%s earns 2 credits\n", currPlayer.getName()));
-            modifyMoney(0, 2, currPlayer);
-          }
-          else {
-            view.print(String.format("%s earns 1 credit and 1 dollar\n", currPlayer.getName()));
-            modifyMoney(1, 1, currPlayer);
-          }
+      boolean successful = false;
 
-          if(result == 0) {
-            view.showPopUp("All shots completed, scene wrap");
-
-            List<Player> playersInRoom = getPlayersInRoom(currentRoom);
-
-            // payout bonuses to players in roles
-            if(currentRoom.checkIfSceneRolesTaken()) {
-
-              // payout bonuses to players in scene roles
-              List<Integer> bonuses = generatePayout(budget);
-              List<Role> sceneRoles = currentRoom.getSceneRoles();
-              int roleIndex = sceneRoles.size() - 1;
-              Player targetPlayer;
-              view.print(String.format("Bonus dice rolled: %s\n", bonuses.toString()));
-              for(int i = 0; i < bonuses.size(); i++) {
-                if(sceneRoles.get(roleIndex).isTaken()) {
-                  targetPlayer = getPlayerInRole(sceneRoles.get(roleIndex), playersInRoom);
-                  view.print(String.format("%s receives %d dollars\n", targetPlayer.getName(), bonuses.get(i)));
-                  modifyMoney(bonuses.get(i), 0, targetPlayer);
-                }
-                roleIndex--;
-                if(roleIndex < 0) {
-                  roleIndex = sceneRoles.size() - 1;
-                }
-              }
-
-              // payout bonuses to players in room roles
-              for(int i = 0; i < playersInRoom.size(); i++) {
-                targetPlayer = playersInRoom.get(i);
-                if(targetPlayer.hasRole() && !targetPlayer.hasSceneRole()) {
-                  view.print(String.format("%s receives %d dollars\n", targetPlayer.getName(), targetPlayer.getRole().getRank()));
-                  modifyMoney(targetPlayer.getRole().getRank(), 0, targetPlayer);
-                }
-              }
-            }
-            for(int i = 0; i < playersInRoom.size(); i++) {
-              playersInRoom.get(i).leaveRole();
-            }
-            currentRoom.wrapScene();
-          }
-        }
-        else if(!currPlayer.hasSceneRole()) {
-          view.print(String.format("Unsuccessful roll, %s earns 1 dollar\n", currPlayer.getName()));
-          modifyMoney(1, 0, currPlayer);
+      budget = currentRoom.getSceneDifficulty();
+      roll = currPlayer.act();
+      view.println(String.format("Acting on role \'%s\', budget %d\n", currPlayer.getRole().getName(), budget));
+      result = currentRoom.shootScene(roll);
+      if(result >= 0) {
+        view.print("Roll successful, ");
+        if(currPlayer.hasSceneRole()) {
+          view.print(String.format("%s earns 2 credits\n", currPlayer.getName()));
+          modifyMoney(0, 2, currPlayer);
         }
         else {
-          view.println("Unsuccessful roll");
+          view.print(String.format("%s earns 1 credit and 1 dollar\n", currPlayer.getName()));
+          modifyMoney(1, 1, currPlayer);
         }
-        return true;
+
+        if(result == 0) {
+          view.showPopUp("All shots completed, scene wrap");
+
+          List<Player> playersInRoom = getPlayersInRoom(currentRoom);
+
+          // payout bonuses to players in roles
+          if(currentRoom.checkIfSceneRolesTaken()) {
+
+            // payout bonuses to players in scene roles
+            List<Integer> bonuses = generatePayout(budget);
+            List<Role> sceneRoles = currentRoom.getSceneRoles();
+            int roleIndex = sceneRoles.size() - 1;
+            Player targetPlayer;
+            view.print(String.format("Bonus dice rolled: %s\n", bonuses.toString()));
+            for(int i = 0; i < bonuses.size(); i++) {
+              if(sceneRoles.get(roleIndex).isTaken()) {
+                targetPlayer = getPlayerInRole(sceneRoles.get(roleIndex), playersInRoom);
+                view.print(String.format("%s receives %d dollars\n", targetPlayer.getName(), bonuses.get(i)));
+                modifyMoney(bonuses.get(i), 0, targetPlayer);
+              }
+              roleIndex--;
+              if(roleIndex < 0) {
+                roleIndex = sceneRoles.size() - 1;
+              }
+            }
+
+            // payout bonuses to players in room roles
+            for(int i = 0; i < playersInRoom.size(); i++) {
+              targetPlayer = playersInRoom.get(i);
+              if(targetPlayer.hasRole() && !targetPlayer.hasSceneRole()) {
+                view.print(String.format("%s receives %d dollars\n", targetPlayer.getName(), targetPlayer.getRole().getRank()));
+                modifyMoney(targetPlayer.getRole().getRank(), 0, targetPlayer);
+              }
+            }
+          }
+          for(int i = 0; i < playersInRoom.size(); i++) {
+            playersInRoom.get(i).leaveRole();
+          }
+          currentRoom.wrapScene();
+        }
+        successful = true;
       }
-      view.println("Player does not have a role");
-      return false;
+      else if(!currPlayer.hasSceneRole()) {
+        view.print(String.format("Unsuccessful roll, %s earns 1 dollar\n", currPlayer.getName()));
+        modifyMoney(1, 0, currPlayer);
+      }
+      else {
+        view.println("Unsuccessful roll");
+      }
+      view.updateInfoPanel(currentDay, activePlayerIndex, getCurrentPlayer());
+      return successful;
     }
 
     public boolean playerRehearse(Player currPlayer) {
@@ -457,6 +473,7 @@ public class Board {
         if(currPlayer.getChips() < currPlayer.getRoom().getSceneDifficulty()) {
           currPlayer.rehearse();
           view.print(String.format("%s now has %d chips\n", currPlayer.getName(), currPlayer.getChips()));
+          view.updateInfoPanel(currentDay, activePlayerIndex, getCurrentPlayer());
           return true;
         }
         else {
@@ -504,6 +521,8 @@ public class Board {
         else {
           view.showPopUp("Invalid money type entered");
         }
+
+        view.updateInfoPanel(currentDay, activePlayerIndex, getCurrentPlayer());
       }
       else {
         view.println("Player is not in the Casting Office");

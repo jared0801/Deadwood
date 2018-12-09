@@ -230,22 +230,22 @@ public class BoardViewManager {
 
     currPlayerLabel = new JLabel();
     currPlayerLabel.setIcon(new ImageIcon(playerImages[0] + "1.png"));
-    currPlayerLabel.setBounds(boardIcon.getIconWidth()+105,236,46,46);
+    currPlayerLabel.setBounds(boardIcon.getIconWidth()+105,231,46,46);
     bPane.add(currPlayerLabel,new Integer(2));
 
     infoTextArea = new JTextArea(5, 20);
     infoTextArea.setEditable(false);
-    infoTextArea.setBounds(boardIcon.getIconWidth() + 10,290,230,100);
+    infoTextArea.setBounds(boardIcon.getIconWidth() + 10,285,230,105);
     bPane.add(infoTextArea, new Integer(2));
   }
 
   public void updateInfoPanel(int day, int playerIndex, Player player) {
     currPlayerLabel.setIcon(new ImageIcon(playerImages[playerIndex] + player.getRank() + ".png"));
     dayLabel.setText("Day " + day);
-    infoTextArea.setText(String.format("Name: %s\nRank: %d\nDollars: %d\nCredits: %d\nRoom: %s\n",
-                                      player.getName(), player.getRank(), player.getDollars(), player.getCredits(), player.getRoom().getName()));
+    infoTextArea.setText(String.format(" Name: %s\n Rank: %d\n Money: $%d, %dcr\n Chips: %d\n Room: %s\n",
+                                      player.getName(), player.getRank(), player.getDollars(), player.getCredits(), player.getChips(), player.getRoom().getName()));
     if(player.hasRole()) {
-      infoTextArea.append(String.format("Role: %s", player.getRole().getName()));
+      infoTextArea.append(String.format(" Role: %s\n Line: %s", player.getRole().getName(), player.getRole().getLine()));
     }
   }
 
@@ -287,6 +287,7 @@ public class BoardViewManager {
   public void resetCards() {
     for(int i = 0; i < 10; i++) {
       cardLabels[i].setIcon(new ImageIcon("media/cards/CardBack.jpg"));
+      cardLabels[i].setVisible(true);
       for(int j = 0; j < takeLabels[i].length; j++) {
         takeLabels[i][j].setVisible(true);
       }
@@ -387,24 +388,34 @@ public class BoardViewManager {
         currRoom = currPlayer.getRoom();
 
         if(e.getSource() == bAct) {
-          if(!tookRole) {
-            if(!playerActed) {
-              playerActed = gameBoard.playerAct(currPlayer);
-              if(playerActed) {
-                int roomIndex = gameBoard.getRoomIndexByName(currRoom.getName());
-                takeLabels[roomIndex][(currRoom.getCurrentShots() > 0 ? currRoom.getCurrentShots() - 1 : 0)].setVisible(false);
-                if(!currRoom.getSceneActive()) {
-                  cardLabels[gameBoard.getRoomIndexByName(currRoom.getName())].setVisible(false);
-                  movePlayerRoom(currRoom, currRoom.getName(), gameBoard.getCurrentPlayerIndex());
+          if(currPlayer.hasRole()) {
+            if(!tookRole) {
+              if(!playerActed) {
+                boolean successful = gameBoard.playerAct(currPlayer);
+                playerActed = true;
+                if(successful) {
+                  int roomIndex = gameBoard.getRoomIndexByName(currRoom.getName());
+                  takeLabels[roomIndex][(currRoom.getCurrentShots() > 0 ? currRoom.getCurrentShots() - 1 : 0)].setVisible(false);
+                  if(!currRoom.getSceneActive()) {
+                    cardLabels[roomIndex].setVisible(false);
+
+                    for(int i = 0; i < sceneRoleLabels[roomIndex].length; i++) {
+                      sceneRoleLabels[roomIndex][i].setVisible(false);
+                    }
+                    movePlayerRoom(currRoom, currRoom.getName(), gameBoard.getCurrentPlayerIndex());
+                  }
                 }
+              }
+              else {
+                println("Player has already acted this turn");
               }
             }
             else {
-              println("Player has already acted this turn");
+                println("Player took a role this turn");
             }
           }
           else {
-              println("Player took a role this turn");
+            println("Player does not have a role");
           }
         }
         else if(e.getSource() == bRehearse) {
@@ -421,18 +432,24 @@ public class BoardViewManager {
           }
         }
         else if(e.getSource() == bMove) {
-          if(!playerMoved && !currPlayer.hasRole()) {
-            playerMoving = true;
-            println("Select a room to move to");
+          if(!playerActed) {
+            if(!playerMoved && !currPlayer.hasRole()) {
+              playerMoving = true;
+              println("Select a room to move to");
 
-            // Highlight available rooms
-            for(int j = 0; j < neighbors.size(); j++) {
-              int ind = gameBoard.getRoomIndexByName(neighbors.get(j));
-              roomLabels[ind].setIcon(new ImageIcon("media/cards/OpenCard.png"));
+              // Highlight available rooms
+              for(int j = 0; j < neighbors.size(); j++) {
+                int ind = gameBoard.getRoomIndexByName(neighbors.get(j));
+
+                roomLabels[ind].setIcon(new ImageIcon("media/cards/OpenCard.png"));
+              }
+            }
+            else {
+              println("Player has already moved or has a role");
             }
           }
           else {
-            println("Player has already moved or has a role");
+            println("Player acted this turn");
           }
         }
         else if(e.getSource() == bEnd) {
