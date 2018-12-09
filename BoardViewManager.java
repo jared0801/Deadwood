@@ -8,13 +8,18 @@ public class BoardViewManager {
 
   private static BoardViewManager instance = null;
 
+  // references to game attributes
   private Board gameBoard;
   private int totalPlayers;
   private Room[] roomArr;
+  private Player currPlayer;
+  private Room currRoom;
 
+  // top layer containers
   JFrame bFrame;
   JLayeredPane bPane;
 
+  // labels for reference
   JLabel boardlabel;
   JLabel playerLabels[];
   JLabel mLabel;
@@ -24,12 +29,14 @@ public class BoardViewManager {
   JLabel sceneRoleLabels[][];
   JLabel trailerLabel;
   JLabel officeLabel;
-  JLabel cardLabels[];
+  JLabel sceneLabels[];
 
+  // info panel objects
   JLabel dayLabel;
   JTextArea infoTextArea;
   JLabel currPlayerLabel;
 
+  // menu buttons
   JButton bAct;
   JButton bRehearse;
   JButton bMove;
@@ -37,16 +44,17 @@ public class BoardViewManager {
   JButton bUpgrade;
   JButton bTakeRole;
 
+  // console box
   JTextArea bTextArea;
   JScrollPane bScrollPane;
 
+  // deadwood image
   ImageIcon boardIcon;
 
+  // player image prefixes
   String playerImages[] = {"media/dice/b", "media/dice/c", "media/dice/g", "media/dice/o", "media/dice/p", "media/dice/r"};
 
-  Player currPlayer;
-  Room currRoom;
-
+  // turn taking booleans
   boolean playerMoving = false;
   boolean playerMoved = false;
 
@@ -85,7 +93,7 @@ public class BoardViewManager {
     initMenu();
     initPlayerDisplay();
     initTextArea();
-    initCards();
+    initScenes();
 
     bFrame.setVisible(true);
     println("Welcome to Deadwood!\n");
@@ -97,15 +105,16 @@ public class BoardViewManager {
     takeLabels = new JLabel[10][];
     roleLabels = new JLabel[10][];
     sceneRoleLabels = new JLabel[10][];
+
     for(int i = 0; i < 10; i++) {
         roomLabels[i] = new JLabel();
         roomLabels[i].setBounds(roomArr[i].getXy()[0], roomArr[i].getXy()[1], roomArr[i].getHw()[1], roomArr[i].getHw()[0]);
-        //roomLabels[i].setBackground(Color.white);
         roomLabels[i].addMouseListener(new boardMouseListener());
         roomLabels[i].setVisible(true);
         roomLabels[i].setOpaque(false);
         bPane.add(roomLabels[i], new Integer(2));
 
+        // shot counter labels
         takeLabels[i] = new JLabel[roomArr[i].getShotCounter()];
         for(int j = 0; j < takeLabels[i].length; j++) {
           takeLabels[i][j] = new JLabel();
@@ -116,6 +125,7 @@ public class BoardViewManager {
           bPane.add(takeLabels[i][j], new Integer(2));
         }
 
+        // off card role labels
         roleLabels[i] = new JLabel[roomArr[i].getOffCardRoles().size()];
         for(int j = 0; j < roleLabels[i].length; j++) {
           roleLabels[i][j] = new JLabel();
@@ -162,6 +172,9 @@ public class BoardViewManager {
     bFrame.setSize(boardIcon.getIconWidth()+250,boardIcon.getIconHeight());
   }
 
+  /* function initPlayers
+     purpose: intializes the player label objects
+  */
   private void initPlayers() {
     playerLabels = new JLabel[6];
     Room trailerRoom = gameBoard.getRoomByName("trailer");
@@ -177,6 +190,9 @@ public class BoardViewManager {
     }
   }
 
+  /* function initMenu
+     purpose: intializes the menu button objects
+  */
   private void initMenu() {
     // Create the Menu for action buttons
     mLabel = new JLabel("MENU");
@@ -223,6 +239,9 @@ public class BoardViewManager {
     bPane.add(bTakeRole, new Integer(2));
   }
 
+  /* function initPlayerDisplay
+     purpose: intializes the info panel objects
+  */
   private void initPlayerDisplay() {
     dayLabel = new JLabel("Day 1");
     dayLabel.setBounds(boardIcon.getIconWidth()+105,210,150,20);
@@ -239,6 +258,12 @@ public class BoardViewManager {
     bPane.add(infoTextArea, new Integer(2));
   }
 
+  /* function updateInfoPanel
+     purpose: updates the text in the info panel based on current conditions
+     parameters: day, current game day
+                 playerIndex, index into the player array
+                 player, currently active Player object
+  */
   public void updateInfoPanel(int day, int playerIndex, Player player) {
     currPlayerLabel.setIcon(new ImageIcon(playerImages[playerIndex] + player.getRank() + ".png"));
     dayLabel.setText("Day " + day);
@@ -249,51 +274,69 @@ public class BoardViewManager {
     }
   }
 
+  /* function showPopUp
+     purpose: wrapper for the JOptionPane message dialog method
+     parameters: msg, String form of the message to display
+  */
   public void showPopUp(String msg) {
     JOptionPane.showMessageDialog(null, msg);
   }
 
-  private void initCards() {
-    cardLabels = new JLabel[10];
+  /* function initScenes
+     purpose: intializes the scene labels
+  */
+  private void initScenes() {
+    sceneLabels = new JLabel[10];
 
     ImageIcon cIcon =  new ImageIcon("media/cards/CardBack.jpg");
 
     for(int i = 0; i < 10; i++) {
-      cardLabels[i] = new JLabel();
-      cardLabels[i].setIcon(cIcon);
-      cardLabels[i].setBounds(roomArr[i].getXy()[0], roomArr[i].getXy()[1], roomArr[i].getHw()[1], roomArr[i].getHw()[0]);
-      cardLabels[i].setOpaque(true);
-      bPane.add(cardLabels[i], new Integer(1));
+      sceneLabels[i] = new JLabel();
+      sceneLabels[i].setIcon(cIcon);
+      sceneLabels[i].setBounds(roomArr[i].getXy()[0], roomArr[i].getXy()[1], roomArr[i].getHw()[1], roomArr[i].getHw()[0]);
+      sceneLabels[i].setOpaque(true);
+      bPane.add(sceneLabels[i], new Integer(1));
     }
   }
 
+  /* function initSceneRoles
+     purpose: intializes the role labels inside the scenes
+  */
   private void initSceneRoles(Room r) {
-    int i = gameBoard.getRoomIndexByName(r.getName());
+    int roomIndex = gameBoard.getRoomIndexByName(r.getName());
+
     List<Role> sceneRoles = r.getSceneRoles();
-    sceneRoleLabels[i] = new JLabel[sceneRoles.size()];
+    sceneRoleLabels[roomIndex] = new JLabel[sceneRoles.size()];
+
     for (int j = 0; j < sceneRoles.size(); j++) {
-      sceneRoleLabels[i][j] = new JLabel();
-      sceneRoleLabels[i][j].setBounds(sceneRoles.get(j).getXy()[0] + cardLabels[i].getX(),
-              sceneRoles.get(j).getXy()[1] + cardLabels[i].getY(),
+      sceneRoleLabels[roomIndex][j] = new JLabel();
+      sceneRoleLabels[roomIndex][j].setBounds(sceneRoles.get(j).getXy()[0] + sceneLabels[roomIndex].getX(),
+              sceneRoles.get(j).getXy()[1] + sceneLabels[roomIndex].getY(),
               sceneRoles.get(j).getHw()[1],
               sceneRoles.get(j).getHw()[0]);
-      sceneRoleLabels[i][j].addMouseListener(new boardMouseListener());
-      sceneRoleLabels[i][j].setOpaque(false);
-      sceneRoleLabels[i][j].setVisible(true);
-      bPane.add(sceneRoleLabels[i][j], new Integer(3));
+      sceneRoleLabels[roomIndex][j].addMouseListener(new boardMouseListener());
+      sceneRoleLabels[roomIndex][j].setOpaque(false);
+      sceneRoleLabels[roomIndex][j].setVisible(true);
+      bPane.add(sceneRoleLabels[roomIndex][j], new Integer(3));
     }
   }
 
+  /* function resetScenes
+     purpose: resets the scene labels for the new day
+  */
   public void resetCards() {
     for(int i = 0; i < 10; i++) {
-      cardLabels[i].setIcon(new ImageIcon("media/cards/CardBack.jpg"));
-      cardLabels[i].setVisible(true);
+      sceneLabels[i].setIcon(new ImageIcon("media/cards/CardBack.jpg"));
+      sceneLabels[i].setVisible(true);
       for(int j = 0; j < takeLabels[i].length; j++) {
         takeLabels[i][j].setVisible(true);
       }
     }
   }
 
+  /* function initTextArea
+     purpose: intializes the console text area
+  */
   private void initTextArea() {
     bTextArea = new JTextArea(5, 20);
     bTextArea.setEditable(false);
@@ -316,6 +359,10 @@ public class BoardViewManager {
     bTextArea.setCaretPosition(bTextArea.getDocument().getLength());
   }
 
+  /* function getPlayerNames
+     purpose: gets input from the players and passes the result to the board controller
+     returns: String array of player names
+  */
   public String[] getPlayerNames() {
     String[] playerNames = new String[totalPlayers];
 
@@ -333,6 +380,9 @@ public class BoardViewManager {
     return playerNames;
   }
 
+  /* function movePlayersTrailer
+     purpose: positions the player labels inside the trailer room
+  */
   public void movePlayersTrailer() {
     List<Player> players = gameBoard.getPlayers();
 
@@ -342,13 +392,19 @@ public class BoardViewManager {
     }
   }
 
+  /* function movePlayerRoom
+     purpose: moves a specific player label to a specified room, adjusting the position based on the other players
+     parameters: currRoom, room player is currently in
+                 targetRoomName, String name of the desired room
+                 playerIndex, index of the active player into the player array
+  */
   private void movePlayerRoom(Room currRoom, String targetRoomName, int playerIndex) {
     int roomIndex = gameBoard.getRoomIndexByName(targetRoomName);
     Room targetRoom = roomArr[roomIndex];
     if(!targetRoom.getName().equals("office") && !targetRoom.getName().equals("trailer")) {
       if(!targetRoom.getVisited() && targetRoom.getSceneActive()) {
         targetRoom.visit();
-        cardLabels[roomIndex].setIcon(new ImageIcon("media/cards/" + targetRoom.getSceneImg()));
+        sceneLabels[roomIndex].setIcon(new ImageIcon("media/cards/" + targetRoom.getSceneImg()));
         initSceneRoles(targetRoom);
       }
     }
@@ -373,6 +429,9 @@ public class BoardViewManager {
     playerLabels[playerIndex].setBounds(loc);
   }
 
+  /* class boardMouseListener
+     purpose: observes MouseEvents that occur and trigger certain functions
+  */
   class boardMouseListener implements MouseListener {
     List<String> neighbors;
 
@@ -387,6 +446,7 @@ public class BoardViewManager {
         currPlayer = gameBoard.getCurrentPlayer();
         currRoom = currPlayer.getRoom();
 
+        /* player acting */
         if(e.getSource() == bAct) {
           if(currPlayer.hasRole()) {
             if(!tookRole) {
@@ -397,7 +457,7 @@ public class BoardViewManager {
                   int roomIndex = gameBoard.getRoomIndexByName(currRoom.getName());
                   takeLabels[roomIndex][(currRoom.getCurrentShots() > 0 ? currRoom.getCurrentShots() - 1 : 0)].setVisible(false);
                   if(!currRoom.getSceneActive()) {
-                    cardLabels[roomIndex].setVisible(false);
+                    sceneLabels[roomIndex].setVisible(false);
 
                     for(int i = 0; i < sceneRoleLabels[roomIndex].length; i++) {
                       sceneRoleLabels[roomIndex][i].setVisible(false);
@@ -418,6 +478,8 @@ public class BoardViewManager {
             println("Player does not have a role");
           }
         }
+
+        /* player rehearsing */
         else if(e.getSource() == bRehearse) {
           if(!tookRole) {
             if(!playerActed) {
@@ -431,6 +493,8 @@ public class BoardViewManager {
             println("Player took a role this turn");
           }
         }
+
+        /* player moving */
         else if(e.getSource() == bMove) {
           if(!playerActed) {
             if(!playerMoved && !currPlayer.hasRole()) {
@@ -452,9 +516,13 @@ public class BoardViewManager {
             println("Player acted this turn");
           }
         }
+
+        /* player end turn */
         else if(e.getSource() == bEnd) {
           turnContinue = false;
         }
+
+        /* player upgrading */
         else if(e.getSource() == bUpgrade) {
           if(currRoom.getName().equals("office")) {
 
@@ -488,6 +556,8 @@ public class BoardViewManager {
             println("Player is not at the Casting Office");
           }
         }
+
+        /* player taking a role */
         else if(e.getSource() == bTakeRole) {
           if(!currPlayer.hasRole()) {
             if(!currRoom.getName().equals("office") && !currRoom.getName().equals("trailer")) {
@@ -507,11 +577,15 @@ public class BoardViewManager {
             println("Player already has a role");
           }
         }
+
+        /* taking a role event handler */
         else if(takingRole) {
           int roomIndex = gameBoard.getRoomIndexByName(currRoom.getName());
           List<Role> roomRoles = currRoom.getOffCardRoles();
           List<Role> sceneRoles = currRoom.getSceneRoles();
+          boolean found = false;
 
+          // look through off card roles in the current room
           for(int i = 0; i < roleLabels[roomIndex].length; i++) {
             if(e.getSource() == roleLabels[roomIndex][i]) {
               tookRole = gameBoard.playerTakeRole(currPlayer, roomRoles.get(i).getName());
@@ -524,28 +598,34 @@ public class BoardViewManager {
 
                 playerMoved = true;
               }
+              found = true;
               break;
             }
           }
 
-          for(int i = 0; i < sceneRoleLabels[roomIndex].length; i++) {
-            if(e.getSource() == sceneRoleLabels[roomIndex][i]) {
-              tookRole = gameBoard.playerTakeRole(currPlayer, sceneRoles.get(i).getName());
-              if(tookRole) {
-                Rectangle loc = new Rectangle(
-                        sceneRoles.get(i).getXy()[0] + cardLabels[gameBoard.getRoomIndexByName(currRoom.getName())].getX(),
-                        sceneRoles.get(i).getXy()[1] + cardLabels[gameBoard.getRoomIndexByName(currRoom.getName())].getY(),
-                        46, 46);
-                playerLabels[gameBoard.getCurrentPlayerIndex()].setBounds(loc);
+          // look through scene roles
+          if(!found) {
+            for(int i = 0; i < sceneRoleLabels[roomIndex].length; i++) {
+              if(e.getSource() == sceneRoleLabels[roomIndex][i]) {
+                tookRole = gameBoard.playerTakeRole(currPlayer, sceneRoles.get(i).getName());
+                if(tookRole) {
+                  Rectangle loc = new Rectangle(
+                          sceneRoles.get(i).getXy()[0] + sceneLabels[gameBoard.getRoomIndexByName(currRoom.getName())].getX(),
+                          sceneRoles.get(i).getXy()[1] + sceneLabels[gameBoard.getRoomIndexByName(currRoom.getName())].getY(),
+                          46, 46);
+                  playerLabels[gameBoard.getCurrentPlayerIndex()].setBounds(loc);
 
-                playerMoved = true;
+                  playerMoved = true;
+                }
+                break;
               }
-              break;
             }
           }
 
           takingRole = false;
         }
+
+        /* player moving event handler */
         else if(playerMoving) {
           List<String> neighbors = currRoom.getNeighbors();
           for(int i = 0; i < neighbors.size(); i++) {
@@ -579,6 +659,7 @@ public class BoardViewManager {
           }
         }
 
+        /* turn end event handler */
         if(!turnContinue) {
           gameBoard.turnEnd();
           playerMoving = false;

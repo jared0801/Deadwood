@@ -13,8 +13,6 @@ public class Deadwood {
       int[][] upgrades = null;
       Board boardCtrl;
       BoardViewManager boardView;
-      //BoardLayersListener boardView;
-      InputManager inputManager;
 
       Document sceneDoc;
       Document boardDoc;
@@ -42,14 +40,8 @@ public class Deadwood {
 
       boardCtrl = new Board(numPlayers, roomArr, sceneArr, upgrades);
       boardView = BoardViewManager.getInstance();
-      //boardView = new BoardLayersListener(numPlayers, boardCtrl);
-
-
-      System.out.println();
 
       boardView.initGUI(boardCtrl, numPlayers);
-      //boardView.setVisible(true);
-
       boardCtrl.createGame();
     }
 }

@@ -9,9 +9,7 @@ public class Board {
     private Room[] rooms;
     private List<Scene> scenes;
     private int[][] upgrades;
-    private InputManager inputManager;
     private boolean activeGame;
-    private JTextArea printer;
     private BoardViewManager view;
 
     public Board(int numPlayers, Room[] roomArr, List<Scene> sceneArr, int[][] upgradeCosts) {
@@ -29,16 +27,6 @@ public class Board {
       upgrades = upgradeCosts;
       activeGame = false;
       view = BoardViewManager.getInstance();
-    }
-
-    public void forceEndDay() {
-      Room currentRoom;
-      for(int i = 0; i < rooms.length; i++) {
-        currentRoom = rooms[i];
-        if(!currentRoom.getName().equals("trailer") && !currentRoom.getName().equals("office")) {
-          currentRoom.wrapScene();
-        }
-      }
     }
 
     /* function newDay
@@ -69,9 +57,6 @@ public class Board {
             if(sceneRef.getActive() && !sceneRef.getAssigned()) {
               rooms[i].setScene(sceneRef);
               sceneRef.assign();
-
-              /* view manager create scene role labels */
-
               notAssigned = false;
             }
           }
@@ -105,6 +90,9 @@ public class Board {
       return;
     }
 
+    /* function turnEnd
+       purpose: ends the current turn and checks if the day is over
+    */
     public void turnEnd() {
       if(!checkDayCont()) {
         activePlayerIndex = (activePlayerIndex + 1) % totalPlayers;
@@ -117,6 +105,10 @@ public class Board {
       }
     }
 
+    /* function checkGameEnd
+       purpose: checks if the game should be over based on the current day
+       returns: true if game is over, false otherwise
+    */
     public boolean checkGameEnd() {
       if(currentDay > totalDays) {
         endGame();
@@ -162,22 +154,29 @@ public class Board {
       return rooms;
   }
 
-    public boolean isActiveGame() { return activeGame; }
+    public boolean isActiveGame() {
+      return activeGame;
+    }
 
+    /* function getCurrentPlayer
+       purpose: finds and returns the currently active player
+       returns: Player object
+    */
     public Player getCurrentPlayer() {
       return players.get(activePlayerIndex);
   }
 
-    public void setCurrentPlayer(Player p) {
-      activePlayerIndex = players.indexOf(p);
-    }
-
+    /* function nextTurn
+       purpose: indicates and changes the next active player
+    */
     public void nextTurn() {
       activePlayerIndex = (activePlayerIndex + 1) % totalPlayers;
       view.print(String.format("\n==========\nYour turn, %s\n", getCurrentPlayer().getName()));
     }
 
-    public int getCurrentPlayerIndex() { return activePlayerIndex; }
+    public int getCurrentPlayerIndex() {
+      return activePlayerIndex;
+    }
 
     public int getPlayerIndexByName(String name) {
       for(int i = 0; i < players.size(); i++) {
@@ -203,12 +202,10 @@ public class Board {
       }
 
       if(currRoom.checkIfNeighbor(roomStr)) {
-        //System.out.format("Moving Player %s from %s to %s\n", targetPlayer.getName(), currRoom.getName(), roomStr);
         view.print(String.format("Moving Player %s from %s to %s\n", targetPlayer.getName(), currRoom.getName(), roomStr));
         targetPlayer.moveTo(targetRoom);
       }
       else {
-        //System.out.println("Not a neighbor. Try again.");
         view.println("Not a neighbor. Try again.");
         return false;
       }
@@ -221,7 +218,7 @@ public class Board {
        parameters: currPlayer, Player object to move
                    roomStr, name of the target Room
     */
-    public void forceMovePlayer(Player currPlayer, String roomStr) {
+    private void forceMovePlayer(Player currPlayer, String roomStr) {
       Room targetRoom = getRoomByName(roomStr);
       if(targetRoom == null) {
         System.out.format("Error: Room \'%s\' not found\n", roomStr);
@@ -264,7 +261,7 @@ public class Board {
     /* function checkDayCont
        purpose: checks if the day should continue or end
     */
-    public boolean checkDayCont() {
+    private boolean checkDayCont() {
       Room currentRoom;
       int scenesRemaining = 0;
       for(int i = 0; i < rooms.length; i++) {
@@ -287,7 +284,7 @@ public class Board {
                    credits, number of credits to add or subtract
                    target, Player to modify
     */
-    public void modifyMoney(int dollars, int credits, Player target) {
+    private void modifyMoney(int dollars, int credits, Player target) {
       target.modifyDollars(dollars);
       target.modifyCredits(credits);
       return;
@@ -324,20 +321,6 @@ public class Board {
       return ret;
     }
 
-    /* function getPlayerByName
-       purpose: finds a player given its name
-       parameters: target, the name of the desired Player
-       returns: Player that corresponds to the given name, null if not found
-    */
-    public Player getPlayerByName(String target) {
-      for(int i = 0; i < players.size(); i++) {
-        if(players.get(i).getName().equals(target)) {
-          return players.get(i);
-        }
-      }
-      return null;
-    }
-
     /* function getPlayerInRole
        purpose: finds the player that has taken the given role, if any
        parameters: target, the given Role to check
@@ -356,14 +339,12 @@ public class Board {
       return null;
     }
 
-    public void listUpgrades() {
-      for(int i = 0; i < upgrades[0].length; i++) {
-        System.out.format("rank %d: %d dollars, %d credits\n", i + 2, upgrades[0][i], upgrades[1][i]);
-      }
-
-      return;
-    }
-
+    /* function playerTakeRole
+       purpose: gives a role to a player
+       parameters: currPlayer, player taking the role
+                   targetRoleName, name of the desired role
+       returns: true if successful, false otherwise
+    */
     public boolean playerTakeRole(Player currPlayer, String targetRoleName) {
       Room currPlayerRoom = currPlayer.getRoom();
       Role targetRole = currPlayerRoom.getRoleByName(targetRoleName);
@@ -393,6 +374,11 @@ public class Board {
       return true;
     }
 
+    /* function playerAct
+       purpose: acts for a role
+       parameters: currPlayer, player that is acting
+       returns: true if successful, false otherwise
+    */
     public boolean playerAct(Player currPlayer) {
       int result = 0;
       int roll = 0;
@@ -468,6 +454,11 @@ public class Board {
       return successful;
     }
 
+    /* function playerRehearse
+       purpose: rehearses for a role
+       parameters: currPlayer, Player that is rehearsing
+       returns: true if successful, false otherwise
+    */
     public boolean playerRehearse(Player currPlayer) {
       if(currPlayer.hasRole()) {
         if(currPlayer.getChips() < currPlayer.getRoom().getSceneDifficulty()) {
@@ -486,6 +477,13 @@ public class Board {
       return false;
     }
 
+    /* function playerUpgrade
+       purpose: upgrades a player based on input given
+       parameters: currPlayer, Player to upgrade
+                   targetRank, integer representing desired rank
+                   moneyType, currency to use, 0 for dollars & 1 for credits
+       returns: true if successful, false otherwise
+    */
     public int playerUpgrade(Player currPlayer, int targetRank, int moneyType) {
       if(currPlayer.getRoom().getName().equals("office")) {
         if(targetRank > 6 || targetRank < 2) {
